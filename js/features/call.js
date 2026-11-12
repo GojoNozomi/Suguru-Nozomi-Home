@@ -752,6 +752,8 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         if (!hdr || !win) return;
         let on = false;
         hdr.addEventListener('pointerdown', e => {
+            // 点到按钮/图标时不启动拖拽，避免 preventDefault 吞掉按钮 click
+            if (e.target.closest('button') || e.target.closest('i')) return;
             if (e.pointerType === 'mouse' && e.button !== 0) return;
             e.preventDefault();
             const r = win.getBoundingClientRect();
