@@ -39,7 +39,7 @@
         +       '<div style="margin-top:4px;"><b>【Public 模式（快捷恢复）】</b>：前往 GitHub 将此仓库 Settings 底部的 Visibility 改为 Public，点击下方“一键恢复”即可还原。<b>⚠ 注意：恢复成功后请立刻改回 Private 防偷窥！</b></div>'
         +     '</div>'
         +     '<input type="password" id="gh-token" placeholder="输入 GitHub Token（必须具备 repo 权限）" style="padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--primary-bg);color:var(--text-primary);font-size:12px;outline:none;" oninput="window.GitHubSync.saveConfig()">'
-        +     '<input type="text" id="gh-repo" placeholder="仓库路径（如 GojoNozomi/Suguru-Nozomi-Memory）" style="padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--primary-bg);color:var(--text-primary);font-size:12px;outline:none;" oninput="window.GitHubSync.saveConfig()">'
+        +     '<input type="text" id="gh-repo" placeholder="仓库路径（如 GojoNozomi/Satoru-Nozomi-Memory）" style="padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--primary-bg);color:var(--text-primary);font-size:12px;outline:none;" oninput="window.GitHubSync.saveConfig()">'
         +     '<input type="text" id="gh-path" placeholder="存储文件名（如 chat_history.json）" value="chat_history.json" style="padding:10px;border-radius:8px;border:1px solid var(--border-color);background:var(--primary-bg);color:var(--text-primary);font-size:12px;outline:none;" oninput="window.GitHubSync.saveConfig()">'
         +     '<div style="display:flex;align-items:center;justify-content:space-between;border-top:1px dashed var(--border-color);padding-top:10px;margin-top:2px;">'
         +       '<div style="font-size:12px;font-weight:600;"><i class="fas fa-sync" style="color:var(--accent-color);margin-right:6px;"></i>自动备份聊天记录</div>'
@@ -523,15 +523,29 @@ window.GitHubSync = {
         if (!cRepo) return this.setStatus('请先填写仓库路径', true);
         this.setStatus('正在走公开免密通道拉取并智能重构...', false);
         try {
-            var rawUrl = 'https://raw.githubusercontent.com/' + cRepo + '/main/' + cPath;
-            var res = await fetch(rawUrl, { cache: 'no-store' });
-            if (!res.ok && res.status === 404) {
-                rawUrl = 'https://raw.githubusercontent.com/' + cRepo + '/master/' + cPath;
-                res = await fetch(rawUrl, { cache: 'no-store' });
-            }
-            if (!res.ok) throw new Error('拉取失败，请确保改成了 Public: ' + res.status);
+            var fetchJsonAny = async function (path) {
+                var urls = [
+                    'https://raw.githubusercontent.com/' + cRepo + '/main/' + path,
+                    'https://raw.githubusercontent.com/' + cRepo + '/master/' + path
+                ];
+                for (var u = 0; u < urls.length; u++) {
+                    var r = await fetch(urls[u], { cache: 'no-store' });
+                    if (r.ok) return await r.json();
+                }
+                throw new Error('拉取失败，请确保改成了 Public');
+            };
 
-            var msgs = await res.json();
+            var msgs = await fetchJsonAny(cPath);
+            if (msgs && msgs.chunked) {
+                this.setStatus('检测到分片备份，正在合并 ' + msgs.parts + ' 个分片...', false);
+                var all = [];
+                for (var p = 1; p <= msgs.parts; p++) {
+                    var partName = msgs.base + '-part' + String(p).padStart(2, '0') + '.json';
+                    var arr = await fetchJsonAny(partName);
+                    if (Array.isArray(arr)) all = all.concat(arr);
+                }
+                msgs = all;
+            }
             if (!Array.isArray(msgs)) throw new Error('云端内容不正确');
 
             var restoredMsgs = msgs.map(function (m) {
@@ -571,6 +585,8 @@ window.GitHubSync = {
         var cPath = this.cleanPath(cfg.path);
 
         if (!cToken || !cRepo) return { success: false, msg: '缺失密钥或配置' };
+        if (this._busy) return { success: false, msg: '正在同步中，请稍候' };
+        this._busy = true;
         try {
             var storageKey = typeof getStorageKey === 'function' ? getStorageKey('chatMessages') : (this.getPfx() + 'chatMessages');
             var messages = await localforage.getItem(storageKey) || window.messages || [];
@@ -599,28 +615,49 @@ window.GitHubSync = {
                 slimMessages.push(slimM);
             }
 
-            var contentStr = JSON.stringify(slimMessages, null, 2);
-            var b64Content = btoa(unescape(encodeURIComponent(contentStr)));
+            // 分片上传：每片 5000 条（约 1MB），避免单次 15MB 大请求超时
+            var CHUNK = 5000;
+            var base = cPath.replace(/\.json$/i, '');
+            var partCount = Math.ceil(slimMessages.length / CHUNK);
+            var self = this;
 
-            var sha = '';
-            var getRes = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + cPath, {
-                headers: { 'Authorization': 'token ' + cToken }
-            });
-            if (getRes.ok) {
-                var getJson = await getRes.json();
-                sha = getJson.sha;
+            var putFile = async function (path, obj, commitMsg) {
+                var content = btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2))));
+                var sha = '';
+                var gr = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + path, {
+                    headers: { 'Authorization': 'token ' + cToken }
+                });
+                if (gr.ok) { var gj = await gr.json(); sha = gj.sha; }
+                var pr = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + path, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'token ' + cToken, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: commitMsg, content: content, sha: sha })
+                });
+                return pr.ok;
+            };
+
+            if (partCount <= 1) {
+                var ok1 = await putFile(cPath, slimMessages, 'Auto-sync chat history');
+                return ok1 ? { success: true, msg: '同步成功（' + slimMessages.length + ' 条）' }
+                           : { success: false, msg: '上传被拒绝' };
             }
 
-            var putRes = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + cPath, {
-                method: 'PUT',
-                headers: { 'Authorization': 'token ' + cToken, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: 'Auto-sync extremely clean chat history ☁️', content: b64Content, sha: sha })
-            });
+            for (var p = 0; p < partCount; p++) {
+                if (self.setStatus) self.setStatus('正在上传分片 ' + (p + 1) + '/' + partCount + ' ...', false);
+                var part = slimMessages.slice(p * CHUNK, (p + 1) * CHUNK);
+                var name = base + '-part' + String(p + 1).padStart(2, '0') + '.json';
+                var okp = await putFile(name, part, 'Auto-sync chunk ' + (p + 1) + '/' + partCount);
+                if (!okp) return { success: false, msg: '分片 ' + (p + 1) + ' 上传失败' };
+            }
 
-            if (putRes.ok) return { success: true, msg: '纯享极简版同步大成功！ ✓' };
-            else return { success: false, msg: '云端接口拒绝: ' + putRes.status };
+            var manifest = { chunked: true, parts: partCount, total: slimMessages.length, chunkSize: CHUNK, base: base };
+            var okm = await putFile(cPath, manifest, 'Auto-sync manifest');
+            if (!okm) return { success: false, msg: '目录文件上传失败' };
+            return { success: true, msg: '同步成功（' + partCount + ' 个分片，共 ' + slimMessages.length + ' 条）' };
         } catch (err) {
             return { success: false, msg: err.message };
+        } finally {
+            this._busy = false;
         }
     }
 };
