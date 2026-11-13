@@ -506,13 +506,13 @@ window.GitHubSync = {
     },
     cleanToken: function (str) { return (str || '').replace(/[^a-zA-Z0-9_]/g, ''); },
     cleanRepo: function (str) { return (str || '').replace(/[^a-zA-Z0-9_.\/-]/g, ''); },
-    cleanPath: function (str) { return (str || '').replace(/[^a-zA-Z0-9_.-]/g, ''); },
+    cleanPath: function (str) { return (str || '').replace(/[^a-zA-Z0-9_./-]/g, ''); },
 
     pushUI: async function () {
-        this.setStatus('正在打包并推送纯享版...', false);
-        var res = await this.push();
+        this.setStatus('正在全量推送...', false);
+        var res = await this.push({ full: true });
         this.setStatus(res.msg, !res.success);
-        if (res.success && typeof showNotification === 'function') showNotification('云端极简版备份成功！', 'success');
+        if (res.success && typeof showNotification === 'function') showNotification('云端全量备份成功！', 'success');
     },
 
     pullUI: async function () {
@@ -540,7 +540,7 @@ window.GitHubSync = {
                 this.setStatus('检测到分片备份，正在合并 ' + msgs.parts + ' 个分片...', false);
                 var all = [];
                 for (var p = 1; p <= msgs.parts; p++) {
-                    var partName = msgs.base + '-part' + String(p).padStart(2, '0') + '.json';
+                    var partName = msgs.base + String(p).padStart(2, '0') + '.json';
                     var arr = await fetchJsonAny(partName);
                     if (Array.isArray(arr)) all = all.concat(arr);
                 }
@@ -578,7 +578,9 @@ window.GitHubSync = {
         }
     },
 
-    push: async function () {
+    push: async function (opts) {
+        opts = opts || {};
+        var full = !!opts.full;
         var cfg = this.getConfig();
         var cToken = this.cleanToken(cfg.token);
         var cRepo = this.cleanRepo(cfg.repo);
@@ -615,9 +617,11 @@ window.GitHubSync = {
                 slimMessages.push(slimM);
             }
 
-            // 分片上传：每片 5000 条（约 1MB），避免单次 15MB 大请求超时
+            // 每片 5000 条（约 700KB），按目录存放：satoru/part-01.json
             var CHUNK = 5000;
-            var base = cPath.replace(/\.json$/i, '');
+            var slash = cPath.lastIndexOf('/');
+            var dir = slash >= 0 ? cPath.slice(0, slash + 1) : '';
+            var partBase = dir + 'part-';
             var partCount = Math.ceil(slimMessages.length / CHUNK);
             var self = this;
 
@@ -637,23 +641,32 @@ window.GitHubSync = {
             };
 
             if (partCount <= 1) {
-                var ok1 = await putFile(cPath, slimMessages, 'Auto-sync chat history');
+                var ok1 = await putFile(cPath, slimMessages, 'sync chat');
                 return ok1 ? { success: true, msg: '同步成功（' + slimMessages.length + ' 条）' }
                            : { success: false, msg: '上传被拒绝' };
             }
 
-            for (var p = 0; p < partCount; p++) {
-                if (self.setStatus) self.setStatus('正在上传分片 ' + (p + 1) + '/' + partCount + ' ...', false);
-                var part = slimMessages.slice(p * CHUNK, (p + 1) * CHUNK);
-                var name = base + '-part' + String(p + 1).padStart(2, '0') + '.json';
-                var okp = await putFile(name, part, 'Auto-sync chunk ' + (p + 1) + '/' + partCount);
-                if (!okp) return { success: false, msg: '分片 ' + (p + 1) + ' 上传失败' };
+            // 增量只传最后一片；全量传所有片
+            var indices = [];
+            if (full) {
+                for (var q = 0; q < partCount; q++) indices.push(q);
+            } else {
+                indices.push(partCount - 1);
             }
 
-            var manifest = { chunked: true, parts: partCount, total: slimMessages.length, chunkSize: CHUNK, base: base };
-            var okm = await putFile(cPath, manifest, 'Auto-sync manifest');
+            for (var k = 0; k < indices.length; k++) {
+                var pi = indices[k];
+                if (self.setStatus) self.setStatus('正在上传 ' + (k + 1) + '/' + indices.length + '（part-' + (pi + 1) + '）...', false);
+                var part = slimMessages.slice(pi * CHUNK, (pi + 1) * CHUNK);
+                var name = partBase + String(pi + 1).padStart(2, '0') + '.json';
+                var okp = await putFile(name, part, 'sync part-' + (pi + 1) + '/' + partCount);
+                if (!okp) return { success: false, msg: 'part-' + (pi + 1) + ' 上传失败' };
+            }
+
+            var manifest = { chunked: true, parts: partCount, total: slimMessages.length, chunkSize: CHUNK, base: partBase };
+            var okm = await putFile(cPath, manifest, 'sync manifest');
             if (!okm) return { success: false, msg: '目录文件上传失败' };
-            return { success: true, msg: '同步成功（' + partCount + ' 个分片，共 ' + slimMessages.length + ' 条）' };
+            return { success: true, msg: '同步成功（' + (full ? '全量 ' + partCount + ' 片' : '增量 1 片') + '，共 ' + slimMessages.length + ' 条）' };
         } catch (err) {
             return { success: false, msg: err.message };
         } finally {
@@ -672,11 +685,13 @@ if (!window._ghSyncInterceptorInstalled) {
             if (window.GitHubSync && window.GitHubSync.getConfig().auto) {
                 clearTimeout(window._ghSyncTimer);
                 window._ghSyncTimer = setTimeout(function () {
+                    if (Date.now() - (window._ghLastPushAt || 0) < 5 * 60 * 1000) return;
                     window.GitHubSync.push().then(function (r) {
+                        if (r.success) window._ghLastPushAt = Date.now();
                         var el = document.getElementById('gh-sync-status');
-                        if (el && r.success) el.textContent = '状态：云端纯享版静默自动同步成功 ✓';
+                        if (el && r.success) el.textContent = '状态：云端增量同步成功 ✓';
                     });
-                }, 5000);
+                }, 60000);
             }
         }
         return res;
