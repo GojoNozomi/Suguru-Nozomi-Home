@@ -3,14 +3,37 @@
     'use strict';
 
     var LIST_ID = 'font-preset-list';
+    var FB_LINK_ID = 'font-fallback-link';
+
+    // 兜底字体：缺字时用它补，保持圆润风格一致
+    var FB_URL = 'https://cdn.jsdelivr.net/npm/cn-fontsource-975-maru-sc-medium-regular@1.0.1/font.css';
+    var FB_FAMILY = '975Maru SC Medium';
 
     var PRESETS = [
-        { id: 'default', name: '默认（系统字体）', meta: '跟随系统默认', url: '' },
-        { id: 'p975',    name: '975 圆体',   meta: '圆体 · 中细',   url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-975-maru-sc-regular@1.0.1/font.css' },
-        { id: 'xiaolai', name: '小赖字体',   meta: '手写 · 细 · 活泼', url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-xiaolai-sc-regular@1.0.2/font.css' },
-        { id: 'yozai',   name: '悠哉字体',   meta: '手写 · 细 · 轻快', url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-yozai-regular@1.0.9/font.css' },
-        { id: 'wenkai',  name: '霞鹜文楷',   meta: '楷体 · 易读',   url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-lxgw-wen-kai-gb-screen@1.0.6/font.css' },
-        { id: 'maoken',  name: '猫啃珠圆体', meta: '圆润 · 偏粗',   url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-maoken-zhuyuan-ti-regular@1.0.1/font.css' }
+        { id: 'default',  name: '默认（系统字体）', meta: '跟随系统默认', url: '' },
+
+        { id: 'p975m',    name: '975 圆体（中细）', meta: '圆体 · 细 · 推荐',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-975-maru-sc-medium-regular@1.0.1/font.css' },
+        { id: 'yozail',   name: '悠哉字体（细）', meta: '手写 · 很细 · 轻快',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-yozai-light-regular@1.0.9/font.css' },
+        { id: 'xiaolaim', name: '小赖字体（等宽）', meta: '手写等宽 · 细',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-xiaolai-mono-sc-regular@1.0.3/font.css' },
+        { id: 'marker',   name: '霞鹜漫黑', meta: '马克笔漫画感',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-lxgw-marker-gothic-regular@1.0.1/font.css' },
+        { id: 'popkaku',  name: '梨沙POP体', meta: 'POP 可爱 · 缺字自动补 975圆体',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-rii-popkaku-r-regular@1.0.3/font.css',
+          fbUrl: FB_URL, fb: FB_FAMILY },
+
+        { id: 'p975',     name: '975 圆体', meta: '圆体 · 中细',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-975-maru-sc-regular@1.0.1/font.css' },
+        { id: 'xiaolai',  name: '小赖字体', meta: '手写 · 细 · 活泼',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-xiaolai-sc-regular@1.0.2/font.css' },
+        { id: 'yozai',    name: '悠哉字体', meta: '手写 · 细 · 轻快',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-yozai-regular@1.0.9/font.css' },
+        { id: 'wenkai',   name: '霞鹜文楷', meta: '楷体 · 易读',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-lxgw-wen-kai-gb-screen@1.0.6/font.css' },
+        { id: 'maoken',   name: '猫啃珠圆体', meta: '圆润 · 偏粗',
+          url: 'https://cdn.jsdelivr.net/npm/cn-fontsource-maoken-zhuyuan-ti-regular@1.0.1/font.css' }
     ];
 
     function key() {
@@ -46,6 +69,8 @@
 
     function nameFromUrl(u) {
         if (!u) return '默认（系统字体）';
+        var preset = PRESETS.filter(function (x) { return x.url && x.url === u; })[0];
+        if (preset) return preset.name;
         var m = u.match(/cn-fontsource-([^@\/]+)/);
         if (m) return m[1].replace(/-/g, ' ');
         var last = u.split('/').pop().split('?')[0];
@@ -56,13 +81,42 @@
         return PRESETS.concat(loadFavs());
     }
 
-    function applyFontObject(p) {
+    function injectFallback(url) {
+        return new Promise(function (resolve) {
+            var link = document.getElementById(FB_LINK_ID);
+            if (!link) {
+                link = document.createElement('link');
+                link.id = FB_LINK_ID;
+                link.rel = 'stylesheet';
+                document.head.appendChild(link);
+            }
+            link.href = url;
+            setTimeout(resolve, 500);
+        });
+    }
+
+    async function applyFontObject(p) {
         var inp = document.getElementById('custom-font-url');
-        var btn = document.getElementById('apply-font-btn');
-        if (!inp || !btn) return;
-        inp.value = p.url || '';
-        btn.click();
+        if (inp) inp.value = p.url || '';
+
+        try {
+            if (typeof settings !== 'undefined' && settings) {
+                settings.customFontUrl = p.url || '';
+                settings.customFontFallback = p.fb ? [p.fb] : null;
+            }
+        } catch (e) {}
+
+        if (p.fbUrl) await injectFallback(p.fbUrl);
+
+        if (typeof applyCustomFont === 'function') {
+            await applyCustomFont(p.url, p.fb ? [p.fb] : null);
+        }
+        if (typeof throttledSaveData === 'function') throttledSaveData();
+
         render();
+        if (typeof showNotification === 'function') {
+            showNotification(p.url ? ('已应用：' + p.name) : '已恢复默认字体', 'success');
+        }
     }
 
     function removeFav(id) {
@@ -138,6 +192,14 @@
         if (typeof showNotification === 'function') showNotification('已保存到「我的字体」 ✓', 'success');
     }
 
+    // 页面加载时如果当前用的是带兜底的字体，补注入兜底字体
+    function restoreFallback() {
+        var cur = currentUrl();
+        if (!cur) return;
+        var p = PRESETS.filter(function (x) { return x.url && x.url === cur; })[0];
+        if (p && p.fbUrl) injectFallback(p.fbUrl);
+    }
+
     function bind() {
         var btn = document.getElementById('save-font-favorite-btn');
         if (btn && btn.dataset.fpBound !== '1') {
@@ -148,6 +210,7 @@
             });
         }
         render();
+        restoreFallback();
     }
 
     window.renderFontPresets = render;
