@@ -1150,6 +1150,13 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
     if (settings.replyEnabled) actionsHTML += `<button class="meta-action-btn reply-btn" title="回复"><i class="fas fa-reply"></i></button>`;
     const starIcon = msg.favorited ? 'fas fa-star' : 'far fa-star';
     actionsHTML += `<button class="meta-action-btn favorite-action-btn ${msg.favorited ? 'favorited' : ''}" title="${msg.favorited ? '取消收藏' : '收藏'}"><i class="${starIcon}"></i></button>`;
+    // 自己发出的消息：5 分钟内可撤回
+    if (msg.sender === 'user' && msg.timestamp && msg.type !== 'poll') {
+        const elapsed = Date.now() - new Date(msg.timestamp).getTime();
+        if (elapsed <= 5 * 60 * 1000) {
+            actionsHTML += `<button class="meta-action-btn recall-btn" title="撤回"><i class="fas fa-undo"></i></button>`;
+        }
+    }
     actionsHTML += `<button class="meta-action-btn delete-btn" title="删除"><i class="fas fa-trash-alt"></i></button>`;
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'message-meta-actions';

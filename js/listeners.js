@@ -74,6 +74,38 @@ function initChatActionListeners() {
                 const message = messages.find(m => m.id === messageId);
                 if (!message) return;
 
+                if (target.classList.contains('recall-btn')) {
+                    if (message.timestamp) {
+                        var elapsed = Date.now() - new Date(message.timestamp).getTime();
+                        if (elapsed > 5 * 60 * 1000) {
+                            showNotification('该消息已无法撤回', 'info', 2000);
+                            return;
+                        }
+                    }
+                    if (message.text) {
+                        DOMElements.messageInput.value = message.text;
+                        DOMElements.messageInput.focus();
+                        try {
+                            DOMElements.messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        } catch (e) {}
+                        try {
+                            DOMElements.messageInput.setSelectionRange(message.text.length, message.text.length);
+                        } catch (e) {}
+                    }
+                    var ridx = messages.findIndex(m => m.id === messageId);
+                    if (ridx > -1) {
+                        var savedTop = DOMElements.chatContainer.scrollTop;
+                        messages.splice(ridx, 1);
+                        throttledSaveData();
+                        renderMessages(true);
+                        requestAnimationFrame(function () {
+                            DOMElements.chatContainer.scrollTop = savedTop;
+                        });
+                        showNotification('消息已撤回，已放回输入框', 'success');
+                    }
+                    return;
+                }
+
 if (target.classList.contains('delete-btn')) {
     if (confirm('确定要删除这条消息吗？')) {
         const index = messages.findIndex(m => m.id === messageId);
