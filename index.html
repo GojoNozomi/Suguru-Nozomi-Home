@@ -1141,6 +1141,19 @@
                             </label>
                         </div>
                     </div>
+                    <p class="cs-group-label" style="margin-top:4px;">来电频率</p>
+                    <div class="cs-card" style="padding:14px 12px;">
+                        <div class="cs-slider-row" style="border-bottom:none;padding:0;">
+                            <span class="cs-slider-label" style="width:auto;white-space:nowrap;">梦角主动打来</span>
+                            <input type="range" min="0" max="100" step="5" value="25" class="font-size-slider" id="call-prob-slider">
+                            <span class="cs-slider-val" id="call-prob-value">25%</span>
+                        </div>
+                        <div id="call-prob-hint" style="font-size:11.5px;color:var(--text-secondary);margin-top:7px;line-height:1.6;">平均约 2 小时 30 分钟会打来一次</div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);margin-top:8px;line-height:1.7;">
+                            <span>每 15–60 分钟判定一次 · <b style="color:var(--accent-color);">默认 25%</b></span>
+                            <button type="button" class="modal-btn modal-btn-secondary" style="padding:4px 10px;height:26px;font-size:11px;white-space:nowrap;margin:0;" onclick="localStorage.removeItem('call_probability');var s=document.getElementById('call-prob-slider');if(s){s.value=25;s.dispatchEvent(new Event('input',{bubbles:true}));}if(typeof showNotification==='function')showNotification('已恢复默认 25%','success');">恢复默认</button>
+                        </div>
+                    </div>
 
                     <p class="cs-group-label" style="margin-top:16px;">📞 视频通话音效配置</p>
                     <div class="cs-card" style="padding:14px 12px;display:flex;flex-direction:column;gap:14px;">
