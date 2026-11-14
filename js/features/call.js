@@ -703,12 +703,51 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         }, 600000);
     }
 
+    // 来电概率（0–100 的百分数），没设置过就用默认 25
+    function getCallProbability() {
+        var v = parseFloat(localStorage.getItem('call_probability'));
+        if (isNaN(v) || v < 0 || v > 100) return 25;
+        return v;
+    }
+
+    // 把概率换算成"平均多久打来一次"的说明文字
+    function callProbHintText(pct) {
+        if (pct <= 0) return '不会主动打来电话';
+        if (pct >= 100) return '每 15–60 分钟就可能打来一次';
+        var mins = 3750 / pct; // 平均 37.5 分钟判定一次 ÷ 概率
+        if (mins < 60) return '平均约 ' + Math.round(mins) + ' 分钟会打来一次';
+        var h = Math.floor(mins / 60);
+        var m = Math.round(mins % 60);
+        if (m === 60) { h += 1; m = 0; }
+        return '平均约 ' + h + ' 小时' + (m ? ' ' + m + ' 分钟' : '') + '会打来一次';
+    }
+
+    function initCallProbSlider() {
+        var sl = document.getElementById('call-prob-slider');
+        var lb = document.getElementById('call-prob-value');
+        var hb = document.getElementById('call-prob-hint');
+        if (!sl) return;
+        var p = getCallProbability();
+        sl.value = p;
+        if (lb) lb.textContent = p + '%';
+        if (hb) hb.textContent = callProbHintText(p);
+        if (sl.dataset.callProbBound === '1') return;
+        sl.dataset.callProbBound = '1';
+        sl.addEventListener('input', function () {
+            var v = Number(sl.value);
+            if (lb) lb.textContent = v + '%';
+            if (hb) hb.textContent = callProbHintText(v);
+            if (v === 25) localStorage.removeItem('call_probability');
+            else localStorage.setItem('call_probability', String(v));
+        });
+    }
+
     function scheduleRandomCall() {
         clearTimeout(S.randomCallTimer);
         if (!S.enabled) return;
         const ms = (15 + Math.random() * 45) * 60 * 1000;
         S.randomCallTimer = setTimeout(() => {
-            if (S.enabled && !S.active && Math.random() < 0.25) showIncomingCall();
+            if (S.enabled && !S.active && Math.random() < (getCallProbability() / 100)) showIncomingCall();
             scheduleRandomCall();
         }, ms);
     }
@@ -752,7 +791,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         if (!hdr || !win) return;
         let on = false;
         hdr.addEventListener('pointerdown', e => {
-            // 点到按钮/图标时不启动拖拽，避免 preventDefault 吞掉按钮 click
+            // 点到按钮/图标时不启动拖拽，否则 preventDefault 会吞掉按钮的 click（导致最小化/尺寸按钮失灵）
             if (e.target.closest('button') || e.target.closest('i')) return;
             if (e.pointerType === 'mouse' && e.button !== 0) return;
             e.preventDefault();
@@ -916,6 +955,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
 
         const late = () => {
             injectToolbarBtn();
+            initCallProbSlider();
             if (S.enabled) scheduleRandomCall();
             const syncCallToggle = () => {
                 const tog = document.getElementById('call-enabled-toggle');
