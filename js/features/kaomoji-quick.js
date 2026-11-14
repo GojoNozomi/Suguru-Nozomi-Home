@@ -22,13 +22,13 @@
     ];
 
     function list() {
-        var arr = [];
+        // 系统默认始终保留，再追加你自己添加的颜文字（去重）
+        var arr = FALLBACK.slice();
         try {
             if (window._kaomojiLibrary && Array.isArray(window._kaomojiLibrary)) {
-                arr = window._kaomojiLibrary.slice();
+                arr = arr.concat(window._kaomojiLibrary);
             }
         } catch (e) {}
-        if (!arr.length) arr = FALLBACK.slice();
         var seen = {};
         return arr.map(function (x) { return String(x == null ? '' : x).trim(); })
             .filter(function (x) {

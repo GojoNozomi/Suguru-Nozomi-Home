@@ -238,9 +238,22 @@
         });
     }
 
+    function syncNames() {
+        var wrap = document.getElementById(MODAL_ID);
+        if (!wrap) return;
+        var n = partnerName();
+        var titleSpan = wrap.querySelector('.modal-title span');
+        if (titleSpan) titleSpan.textContent = '问 ' + n;
+        var q = wrap.querySelector('#ask-question');
+        if (q) q.setAttribute('placeholder', '想问 ' + n + ' 什么？例如：你喜欢我吗？');
+        var btn = wrap.querySelector('#ask-submit');
+        if (btn) btn.innerHTML = '<i class="fas fa-paper-plane"></i> 问 ' + n;
+    }
+
     window.openAskPartner = function () {
         ensureModal();
         renderLog();
+        syncNames();
         setTimeout(function () {
             if (typeof showModal === 'function') showModal(document.getElementById(MODAL_ID));
         }, 60);

@@ -710,6 +710,19 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         return v;
     }
 
+    // 取你给梦角设置的备注名
+    function partnerDisplayName() {
+        try {
+            if (typeof settings !== 'undefined' && settings && settings.partnerName) return settings.partnerName;
+        } catch (e) {}
+        return '梦角';
+    }
+
+    function syncCallProbLabel() {
+        var el = document.getElementById('call-prob-label');
+        if (el) el.textContent = partnerDisplayName() + ' 主动打来';
+    }
+
     // 把概率换算成"平均多久打来一次"的说明文字
     function callProbHintText(pct) {
         if (pct <= 0) return '不会主动打来电话';
@@ -726,6 +739,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         var sl = document.getElementById('call-prob-slider');
         var lb = document.getElementById('call-prob-value');
         var hb = document.getElementById('call-prob-hint');
+        syncCallProbLabel();
         if (!sl) return;
         var p = getCallProbability();
         sl.value = p;
@@ -956,6 +970,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         const late = () => {
             injectToolbarBtn();
             initCallProbSlider();
+            setInterval(syncCallProbLabel, 2000);
             if (S.enabled) scheduleRandomCall();
             const syncCallToggle = () => {
                 const tog = document.getElementById('call-enabled-toggle');
