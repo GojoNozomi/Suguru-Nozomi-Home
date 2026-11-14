@@ -967,6 +967,32 @@ window.manageEnvelopeAutoSendTimer = manageEnvelopeAutoSendTimer;
             }
         };
 
+function buildPollHTML(msg) {
+    var poll = (msg && msg.poll) || {};
+    var opts = Array.isArray(poll.opts) ? poll.opts : [];
+    var picked = Array.isArray(poll.picked) ? poll.picked : [];
+    var esc = function (s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    };
+    var html = '<div class="poll-card' + (poll.mode === 'multi' ? ' poll-multi' : '') + '" data-poll-id="' + msg.id + '">';
+    html += '<div class="poll-q">' + esc(poll.q || msg.text || '') + '</div>';
+    for (var i = 0; i < opts.length; i++) {
+        var sel = picked.indexOf(i) > -1;
+        html += '<div class="poll-opt' + (sel ? ' poll-opt-picked' : '') + '">' +
+            '<span class="poll-opt-radio"></span>' +
+            '<span class="poll-opt-text">' + esc(opts[i]) + '</span>' +
+            (sel ? '<span class="poll-opt-tag">已选</span>' : '') +
+            '</div>';
+    }
+    if (picked.length) {
+        html += '<div class="poll-foot">' + (poll.mode === 'multi' ? '已选 ' + picked.length + ' 项' : '已作答') + '</div>';
+    }
+    html += '</div>';
+    return html;
+}
+
 function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
     const fragment = new DocumentFragment();
     const messageDate = new Date(msg.timestamp).toDateString();
@@ -1100,13 +1126,20 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
         messageHTML += `<div class="reply-indicator" data-reply-id="${msg.replyTo.id || ''}" style="cursor:pointer;" onclick="scrollToQuotedMessage(this)"><span class="reply-indicator-sender">${repliedSender}</span><span class="reply-indicator-text">${repliedText}</span></div>`;
     }
 
-    const isImageOnly = !msg.text && !!msg.image;
-    let content = msg.text ? `<div>${msg.text.replace(/\n/g, '<br>')}</div>` : '';
-    if (msg.image) content += `<img src="${msg.image}" class="message-image${isImageOnly ? ' message-image-only' : ''}" alt="图片" style="max-width:${isImageOnly ? '100px' : '100px'}; border-radius: 12px;${!isImageOnly ? ' margin-top: 6px;' : ''} cursor: pointer;" onclick="viewImage('${msg.image}')">`;
-    messageHTML += content;
+    let isImageOnly = false;
+    if (msg.type === 'poll') {
+        messageHTML += buildPollHTML(msg);
+    } else {
+        isImageOnly = !msg.text && !!msg.image;
+        let content = msg.text ? `<div>${msg.text.replace(/\n/g, '<br>')}</div>` : '';
+        if (msg.image) content += `<img src="${msg.image}" class="message-image${isImageOnly ? ' message-image-only' : ''}" alt="图片" style="max-width:${isImageOnly ? '100px' : '100px'}; border-radius: 12px;${!isImageOnly ? ' margin-top: 6px;' : ''} cursor: pointer;" onclick="viewImage('${msg.image}')">`;
+        messageHTML += content;
+    }
 
     const messageDiv = document.createElement('div');
-    if (isImageOnly) {
+    if (msg.type === 'poll') {
+        messageDiv.className = `message message-${msg.sender === 'user' ? 'sent' : 'received'} message-poll`;
+    } else if (isImageOnly) {
         messageDiv.className = `message message-${msg.sender === 'user' ? 'sent' : 'received'} message-image-bubble-none`;
     } else {
         messageDiv.className = `message message-${msg.sender === 'user' ? 'sent' : 'received'} ${settings.bubbleStyle}`;

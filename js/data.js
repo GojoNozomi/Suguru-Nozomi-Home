@@ -614,6 +614,7 @@ window.GitHubSync = {
                     slimM.time = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
                 }
                 if (m.replyTo !== undefined && m.replyTo !== null && m.replyTo !== '') slimM.replyTo = m.replyTo;
+                if (m.poll && typeof m.poll === 'object') slimM.poll = m.poll;
                 slimMessages.push(slimM);
             }
 
@@ -627,17 +628,30 @@ window.GitHubSync = {
 
             var putFile = async function (path, obj, commitMsg) {
                 var content = btoa(unescape(encodeURIComponent(JSON.stringify(obj, null, 2))));
-                var sha = '';
-                var gr = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + path, {
-                    headers: { 'Authorization': 'token ' + cToken }
-                });
-                if (gr.ok) { var gj = await gr.json(); sha = gj.sha; }
-                var pr = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + path, {
-                    method: 'PUT',
-                    headers: { 'Authorization': 'token ' + cToken, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: commitMsg, content: content, sha: sha })
-                });
-                return pr.ok;
+                for (var attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        var sha = '';
+                        var gr = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + path, {
+                            headers: { 'Authorization': 'token ' + cToken }
+                        });
+                        if (gr.ok) { var gj = await gr.json(); sha = gj.sha; }
+                        var pr = await fetch('https://api.github.com/repos/' + cRepo + '/contents/' + path, {
+                            method: 'PUT',
+                            headers: { 'Authorization': 'token ' + cToken, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message: commitMsg, content: content, sha: sha })
+                        });
+                        if (pr.ok) return true;
+                        // 409 冲突 / 403 限流 / 5xx 服务端错误 → 退避重试
+                        if (pr.status === 409 || pr.status === 403 || pr.status >= 500) {
+                            await new Promise(function (r) { setTimeout(r, 900 * (attempt + 1)); });
+                            continue;
+                        }
+                        return false;
+                    } catch (e) {
+                        await new Promise(function (r) { setTimeout(r, 900 * (attempt + 1)); });
+                    }
+                }
+                return false;
             };
 
             if (partCount <= 1) {
