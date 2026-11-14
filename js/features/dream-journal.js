@@ -49,26 +49,25 @@
         wrap.className = 'modal';
         wrap.id = MODAL_ID;
         wrap.innerHTML = [
-            '<div class="modal-content">',
+            '<div class="modal-content" style="height:560px;max-height:80vh;padding-bottom:22px;">',
             '  <div class="modal-title"><i class="fas fa-moon"></i><span>入梦记录</span></div>',
-
-            '  <div style="display:flex;gap:6px;margin-bottom:14px;">',
+            '  <div style="display:flex;gap:6px;margin-bottom:14px;flex-shrink:0;">',
             '    <button class="env-tab-btn active" id="dream-tab-write">记录梦境</button>',
             '    <button class="env-tab-btn" id="dream-tab-history">过往梦境</button>',
             '  </div>',
 
-            '  <div id="dream-page-write">',
-            '    <input id="dream-date" type="date" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--border-color);border-radius:10px;background:var(--primary-bg);color:var(--text-primary);font-size:12px;font-family:inherit;outline:none;margin-bottom:10px;">',
-            '    <textarea id="dream-text" rows="5" placeholder="记录这次入梦的场景、对话、心情……" style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border-color);border-radius:10px;background:var(--primary-bg);color:var(--text-primary);font-size:13px;line-height:1.75;font-family:inherit;resize:vertical;outline:none;"></textarea>',
-            '    <div style="display:flex;gap:8px;margin-top:12px;">',
+            '  <div id="dream-page-write" style="flex:1;display:flex;flex-direction:column;min-height:0;">',
+            '    <input id="dream-date" type="date" style="width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--border-color);border-radius:10px;background:var(--primary-bg);color:var(--text-primary);font-size:12px;font-family:inherit;outline:none;margin-bottom:10px;flex-shrink:0;">',
+            '    <textarea id="dream-text" placeholder="记录这次入梦的场景、对话、心情……" style="flex:1;min-height:0;width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border-color);border-radius:10px;background:var(--primary-bg);color:var(--text-primary);font-size:13px;line-height:1.75;font-family:inherit;resize:none;outline:none;"></textarea>',
+            '    <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0;">',
             '      <button id="dream-save" style="' + BTN_PRIMARY + '"><i class="fas fa-feather"></i> 提笔记录</button>',
             '      <button id="dream-close-1" style="' + BTN_CLOSE + '">关闭</button>',
             '    </div>',
             '  </div>',
 
-            '  <div id="dream-page-history" style="display:none;">',
-            '    <div id="dream-list" style="display:flex;flex-direction:column;gap:8px;max-height:44vh;overflow-y:auto;padding-right:2px;"></div>',
-            '    <div style="display:flex;gap:8px;margin-top:12px;">',
+            '  <div id="dream-page-history" style="display:none;flex:1;flex-direction:column;min-height:0;">',
+            '    <div id="dream-list" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto;padding-right:2px;"></div>',
+            '    <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0;">',
             '      <button id="dream-share" style="' + BTN_PRIMARY + '"><i class="fas fa-paper-plane"></i> 分享给 ' + esc(partnerName()) + '</button>',
             '      <button id="dream-close-2" style="' + BTN_CLOSE + '">关闭</button>',
             '    </div>',
@@ -137,8 +136,8 @@
         var isWrite = which === 'write';
         tw.classList.toggle('active', isWrite);
         th.classList.toggle('active', !isWrite);
-        pw.style.display = isWrite ? '' : 'none';
-        ph.style.display = isWrite ? 'none' : '';
+        pw.style.display = isWrite ? 'flex' : 'none';
+        ph.style.display = isWrite ? 'none' : 'flex';
         if (!isWrite) render();
     }
 

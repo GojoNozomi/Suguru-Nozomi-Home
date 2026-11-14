@@ -74,33 +74,33 @@
         wrap.className = 'modal';
         wrap.id = MODAL_ID;
         wrap.innerHTML = [
-            '<div class="modal-content">',
+            '<div class="modal-content" style="height:560px;max-height:80vh;padding-bottom:22px;">',
             '  <div class="modal-title"><i class="fas fa-circle-question"></i><span>问 ' + esc(partnerName()) + '</span></div>',
 
-            '  <div style="display:flex;gap:6px;margin-bottom:14px;">',
+            '  <div style="display:flex;gap:6px;margin-bottom:14px;flex-shrink:0;">',
             '    <button class="env-tab-btn active" id="ask-tab-write">问问题</button>',
             '    <button class="env-tab-btn" id="ask-tab-history">过往问答</button>',
             '  </div>',
 
-            '  <div id="ask-page-write">',
-            '    <input id="ask-question" type="text" placeholder="想问 TA 什么？例如：你喜欢我吗？" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border-color);border-radius:10px;background:var(--primary-bg);color:var(--text-primary);font-size:13px;font-family:inherit;outline:none;">',
-            '    <div style="display:flex;gap:6px;margin-top:11px;">',
+            '  <div id="ask-page-write" style="flex:1;display:flex;flex-direction:column;min-height:0;">',
+            '    <input id="ask-question" type="text" placeholder="想问 TA 什么？例如：你喜欢我吗？" style="flex-shrink:0;width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border-color);border-radius:10px;background:var(--primary-bg);color:var(--text-primary);font-size:13px;font-family:inherit;outline:none;">',
+            '    <div style="display:flex;gap:6px;margin-top:11px;flex-shrink:0;">',
             '      <button type="button" id="ask-mode-single" style="' + MODE_ON + '">单选</button>',
             '      <button type="button" id="ask-mode-multi" style="' + MODE_OFF + '">多选</button>',
             '    </div>',
-            '    <div style="font-size:11px;color:var(--text-secondary);letter-spacing:1px;margin:11px 0 7px;">选项</div>',
-            '    <div id="ask-opt-list" style="display:flex;flex-direction:column;gap:6px;"></div>',
-            '    <button class="modal-btn modal-btn-secondary" id="ask-add-opt" style="margin:8px 0 0;width:100%;"><i class="fas fa-plus"></i> 添加选项</button>',
-            '    <div style="display:flex;gap:8px;margin-top:12px;">',
+            '    <div style="font-size:11px;color:var(--text-secondary);letter-spacing:1px;margin:11px 0 7px;flex-shrink:0;">选项</div>',
+            '    <div id="ask-opt-list" style="flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:2px;"></div>',
+            '    <button class="modal-btn modal-btn-secondary" id="ask-add-opt" style="margin:8px 0 0;width:100%;flex-shrink:0;"><i class="fas fa-plus"></i> 添加选项</button>',
+            '    <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0;">',
             '      <button id="ask-submit" style="' + BTN_PRIMARY + '"><i class="fas fa-paper-plane"></i> 发送</button>',
             '      <button id="ask-again" style="' + BTN_SECOND + '"><i class="fas fa-rotate-right"></i> 再问</button>',
             '      <button id="ask-close-1" style="' + BTN_CLOSE + '">关闭</button>',
             '    </div>',
             '  </div>',
 
-            '  <div id="ask-page-history" style="display:none;">',
-            '    <div id="ask-log-list" style="display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto;padding-right:2px;"></div>',
-            '    <div style="margin-top:12px;">',
+            '  <div id="ask-page-history" style="display:none;flex:1;flex-direction:column;min-height:0;">',
+            '    <div id="ask-log-list" style="flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;overflow-y:auto;padding-right:2px;"></div>',
+            '    <div style="margin-top:12px;flex-shrink:0;">',
             '      <button id="ask-close-2" style="width:100%;padding:12px;background:transparent;border:1px solid var(--border-color);border-radius:12px;font-size:13px;color:var(--text-secondary);cursor:pointer;font-family:var(--font-family);">关闭</button>',
             '    </div>',
             '  </div>',
@@ -315,8 +315,8 @@
         var isWrite = which === 'write';
         tw.classList.toggle('active', isWrite);
         th.classList.toggle('active', !isWrite);
-        pw.style.display = isWrite ? '' : 'none';
-        ph.style.display = isWrite ? 'none' : '';
+        pw.style.display = isWrite ? 'flex' : 'none';
+        ph.style.display = isWrite ? 'none' : 'flex';
         if (!isWrite) renderLog();
     }
 
