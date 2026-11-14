@@ -1073,7 +1073,11 @@
             opacity: 0;
             transform: translateY(5px);
             transition: var(--transition);
-            z-index: 2;
+            z-index: 60;
+        }
+        /* 悬停中的消息整体提到最上层，保证操作栏不被装饰图/贴图盖住 */
+        .message-wrapper:hover {
+            z-index: 40;
         }
         .message-content-wrapper:hover .message-meta-actions {
             opacity: 1;
