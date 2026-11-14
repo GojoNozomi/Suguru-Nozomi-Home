@@ -295,11 +295,48 @@ function deduplicateContentArray(arr, baseSystemArray = []) {
         };
 
 async function applyCustomFont(url) {
+    const linkId = 'user-custom-font-link';
     if (!url || !url.trim()) {
         document.documentElement.style.removeProperty('--font-family');
         document.documentElement.style.removeProperty('--message-font-family');
+        const old = document.getElementById(linkId);
+        if (old) old.remove();
         return;
     }
+
+    // CSS 链接（字体 CDN / Google Fonts）：注入 link，自动解析 font-family
+    if (/\.css(\?|#|$)/i.test(url) || /fonts\.googleapis\.com/i.test(url)) {
+        try {
+            let family = null;
+            try {
+                const cssText = await (await fetch(url)).text();
+                const m = cssText.match(/font-family:\s*(['"])(.*?)\1/);
+                if (m) family = m[2];
+            } catch (e) {}
+            if (!family) throw new Error('无法解析字体名称');
+
+            let link = document.getElementById(linkId);
+            if (!link) {
+                link = document.createElement('link');
+                link.id = linkId;
+                link.rel = 'stylesheet';
+                document.head.appendChild(link);
+            }
+            link.href = url;
+            await new Promise(r => setTimeout(r, 400));
+
+            const fontStack = `"${family}", 'Noto Serif SC', serif`;
+            document.documentElement.style.setProperty('--font-family', fontStack);
+            document.documentElement.style.setProperty('--message-font-family', fontStack);
+            if (typeof settings !== 'undefined') settings.messageFontFamily = fontStack;
+            return;
+        } catch (e) {
+            console.error('字体加载失败:', e);
+            showNotification('字体加载失败，请检查链接是否有效', 'error');
+            return;
+        }
+    }
+
     const fontName = 'UserCustomFont';
     try {
         const font = new FontFace(fontName, `url(${url})`);
