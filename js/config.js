@@ -1,6 +1,6 @@
 /*应用常量与数据结构*/
 
-        const APP_PREFIX = 'CHAT_APP_V4_';
+        const APP_PREFIX = 'CHAT_APP_SUGURU_';
         // ── 版本号 & 发布日期：每次更新代码后只改下面这两个值，启动页和主页顶部会自动显示 ──
         const APP_VERSION = '5.1.0';
         const APP_BUILD_DATE = '2026-11-14';
