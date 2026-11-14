@@ -20,7 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-    <link rel="stylesheet" href="css/styles.css?v=13">
+    <link rel="stylesheet" href="css/styles.css?v=14">
 
     <style id="css-live-preview-style"></style>
 </head>
@@ -649,6 +649,13 @@
                 </div>
                 <div style="font-size: 10px; color: var(--text-secondary); margin-top: 4px; opacity: 0.7;">
                     提示: 应用后将覆盖默认字体。留空并应用可恢复默认。
+                </div>
+                <div style="margin-top: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 12px; color: var(--text-secondary); font-weight: 500;">我的字体</span>
+                        <button id="save-font-favorite-btn" style="font-size: 11px; padding: 5px 10px; border: 1px solid var(--border-color); border-radius: 8px; background: transparent; color: var(--accent-color); cursor: pointer; font-family: var(--font-family); white-space: nowrap;"><i class="fas fa-plus" style="font-size: 9px;"></i> 保存当前链接</button>
+                    </div>
+                    <div id="font-preset-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
                 </div>
             </div>
         </div>
@@ -2182,31 +2189,32 @@
 
 <div id="dg-editor-modal" style="display:none;"></div>
     <!-- == 核心层 == -->
-    <script src="js/config.js?v=13"></script>
-    <script src="js/utils.js?v=13"></script>
-    <script src="js/backup-engine.js?v=13"></script>
-    <script src="js/state.js?v=13"></script>
-    <script src="js/core.js?v=13"></script>
+    <script src="js/config.js?v=14"></script>
+    <script src="js/utils.js?v=14"></script>
+    <script src="js/backup-engine.js?v=14"></script>
+    <script src="js/state.js?v=14"></script>
+    <script src="js/core.js?v=14"></script>
 
     <!-- == 功能模块 == -->
-    <script src="js/features/mood.js?v=13"></script>
-    <script src="js/features/envelope.js?v=13"></script>
-    <script src="js/features/reply-library.js?v=13"></script>
-    <script src="js/features/theme-editor.js?v=13"></script>
-    <script src="js/features/group-chat.js?v=13"></script>
-    <script src="js/features/dream-journal.js?v=13"></script>
-    <script src="js/features/wishlist.js?v=13"></script>
-    <script src="js/features/ask-partner.js?v=13"></script>
-    <script src="js/features/kaomoji-quick.js?v=13"></script>
-    <script src="js/features/call.js?v=13"></script>
+    <script src="js/features/mood.js?v=14"></script>
+    <script src="js/features/envelope.js?v=14"></script>
+    <script src="js/features/reply-library.js?v=14"></script>
+    <script src="js/features/theme-editor.js?v=14"></script>
+    <script src="js/features/font-presets.js?v=14"></script>
+    <script src="js/features/group-chat.js?v=14"></script>
+    <script src="js/features/dream-journal.js?v=14"></script>
+    <script src="js/features/wishlist.js?v=14"></script>
+    <script src="js/features/ask-partner.js?v=14"></script>
+    <script src="js/features/kaomoji-quick.js?v=14"></script>
+    <script src="js/features/call.js?v=14"></script>
 
     <!-- == 合并模块 == -->
-    <script src="js/games.js?v=13"></script> 
-    <script src="js/features.js?v=13"></script> 
-    <script src="js/data.js?v=13"></script>
-    <script src="js/onboarding.js?v=13"></script> 
-    <script src="js/listeners.js?v=13"></script>
-    <script src="js/app.js?v=13"></script>
+    <script src="js/games.js?v=14"></script> 
+    <script src="js/features.js?v=14"></script> 
+    <script src="js/data.js?v=14"></script>
+    <script src="js/onboarding.js?v=14"></script> 
+    <script src="js/listeners.js?v=14"></script>
+    <script src="js/app.js?v=14"></script>
     <script>
         (function () {
             var v = (window.APP_VERSION || '5.0.0') + ' · ' + (window.APP_BUILD_DATE || '');
