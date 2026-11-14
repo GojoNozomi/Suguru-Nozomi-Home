@@ -10922,3 +10922,13 @@
         .poll-opt-text { flex: 1; font-size: 12.5px; color: var(--text-primary); word-break: break-word; }
         .poll-opt-tag { font-size: 10px; color: var(--accent-color); font-weight: 600; flex-shrink: 0; }
         .poll-foot { margin-top: 8px; font-size: 10.5px; color: var(--text-secondary); text-align: right; }
+
+        /* 问卷卡片：按明暗主题固定底色与文字色，保证任何主题下都清晰 */
+        html[data-theme="light"] .poll-card { background-color: #ffffff; }
+        html[data-theme="light"] .poll-q,
+        html[data-theme="light"] .poll-opt-text { color: #1a1a1a; }
+        html[data-theme="light"] .poll-foot { color: #7a7a7a; }
+        html[data-theme="dark"] .poll-card { background-color: #1e1e1e; }
+        html[data-theme="dark"] .poll-q,
+        html[data-theme="dark"] .poll-opt-text { color: #e8e8e8; }
+        html[data-theme="dark"] .poll-foot { color: #8c8c8c; }
