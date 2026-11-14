@@ -1147,7 +1147,7 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
     messageDiv.innerHTML = messageHTML;
 
     let actionsHTML = '';
-    if (settings.replyEnabled) actionsHTML += `<button class="meta-action-btn reply-btn" title="回复"><i class="fas fa-reply"></i></button>`;
+    if (settings.replyEnabled) actionsHTML += `<button class="meta-action-btn reply-btn" title="引用回复"><i class="fas fa-quote-left"></i></button>`;
     const starIcon = msg.favorited ? 'fas fa-star' : 'far fa-star';
     actionsHTML += `<button class="meta-action-btn favorite-action-btn ${msg.favorited ? 'favorited' : ''}" title="${msg.favorited ? '取消收藏' : '收藏'}"><i class="${starIcon}"></i></button>`;
     // 自己发出的消息：5 分钟内可撤回
