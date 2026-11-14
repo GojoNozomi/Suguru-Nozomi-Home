@@ -24,6 +24,9 @@
         pillDragged:     false,
         resizeInit:      null,
         incomingTimer:   null,
+        incomingTickTimer: null,
+        incomingStartedAt: null,
+        lastWaitMs: null,
         connectingTimer: null,
         outgoingTimeoutTimer: null, // 去电强制挂断安全计时器（10 分钟无应答）
         randomCallTimer: null,
@@ -114,6 +117,7 @@
 .call-inc-name{font-size:22px;font-weight:700;margin-top:4px;}
 .call-inc-sub{font-size:12.5px;color:rgba(255,255,255,.48);display:flex;align-items:center;gap:6px;}
 .call-inc-sub-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.48);animation:cBl 1.1s step-end infinite;}
+.call-inc-wait{font-size:12px;color:rgba(255,255,255,.62);letter-spacing:.5px;margin-top:7px;font-variant-numeric:tabular-nums;}
 .call-inc-actions{display:flex;gap:44px;margin-top:26px;}
 .call-inc-btn{display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:none;cursor:pointer;color:#fff;}
 .call-inc-circle{
@@ -406,6 +410,7 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
     </div>
     <div class="call-inc-name" id="call-inc-name">对方</div>
     <div class="call-inc-sub"><span class="call-inc-sub-dot"></span><span>邀请您进行视频通话</span></div>
+    <div class="call-inc-wait" id="call-inc-wait"></div>
     <div class="call-inc-actions">
       <button class="call-inc-btn call-inc-reject" id="call-inc-reject">
         <div class="call-inc-circle">${SVG_HU}</div>
@@ -594,7 +599,9 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
 
     function sendCallMsg(dur) {
         if (dur < 2000) return;
-        sendCallEvent('fa-video', '视频通话已结束', fmt(dur));
+        const waitStr = S.lastWaitMs ? fmtWait(S.lastWaitMs) : '';
+        const detail = '通话 ' + fmt(dur) + (waitStr ? ' · 等待 ' + waitStr : '');
+        sendCallEvent('fa-video', '视频通话已结束', detail);
     }
 
     function startCall(isPartner) {
@@ -683,6 +690,25 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
             showNotification('通话已挂断', 'info', 2000);
     }
 
+    function fmtWait(ms) {
+        const s2 = Math.max(0, Math.floor(ms / 1000));
+        const m = Math.floor(s2 / 60);
+        const ss = s2 % 60;
+        return (m > 0 ? m + '分' : '') + ss + '秒';
+    }
+
+    function stopIncomingWait() {
+        clearInterval(S.incomingTickTimer);
+        S.incomingTickTimer = null;
+        const el = document.getElementById('call-inc-wait');
+        if (el) el.textContent = '';
+        if (S.incomingStartedAt) {
+            S.lastWaitMs = Date.now() - S.incomingStartedAt;
+            S.incomingStartedAt = null;
+        }
+        return S.lastWaitMs ? fmtWait(S.lastWaitMs) : '';
+    }
+
     function showIncomingCall() {
         if (!S.enabled || S.active) return;
         const ov = document.getElementById('call-incoming-overlay');
@@ -693,13 +719,30 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
 
         playCallSound('incoming');
 
+        // 记录来电开始时间，并显示"已等待"计时
+        S.incomingStartedAt = Date.now();
+        S.lastWaitMs = null;
+        clearInterval(S.incomingTickTimer);
+        const _waitEl = document.getElementById('call-inc-wait');
+        if (_waitEl) _waitEl.textContent = '已等待 00:00';
+        S.incomingTickTimer = setInterval(() => {
+            if (!ov.classList.contains('visible') || !S.incomingStartedAt) {
+                clearInterval(S.incomingTickTimer); S.incomingTickTimer = null; return;
+            }
+            const sec = Math.floor((Date.now() - S.incomingStartedAt) / 1000);
+            const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+            const ss2 = String(sec % 60).padStart(2, '0');
+            if (_waitEl) _waitEl.textContent = '已等待 ' + mm + ':' + ss2;
+        }, 1000);
+
         // 来电：等待 10 分钟，超时未接才自动挂断
         S.incomingTimer = setTimeout(() => {
             if (!ov.classList.contains('visible')) return;
             ov.classList.remove('visible');
             stopAllCallSounds();
             const myName = (typeof settings !== 'undefined' && settings.myName) || '我';
-            sendCallEvent('fa-phone-slash', `${myName}未接听 ${getName()} 的来电`, null);
+            const _w = stopIncomingWait();
+            sendCallEvent('fa-phone-slash', `${myName}未接听 ${getName()} 的来电`, _w ? ('等待 ' + _w) : null);
         }, 600000);
     }
 
@@ -896,12 +939,14 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
             clearTimeout(S.incomingTimer);
             stopAllCallSounds();
             const myName = (typeof settings !== 'undefined' && settings.myName) || '我';
-            sendCallEvent('fa-phone-slash', `${myName}拒绝了 ${getName()} 的通话`, null);
+            const _w = stopIncomingWait();
+            sendCallEvent('fa-phone-slash', `${myName}拒绝了 ${getName()} 的通话`, _w ? ('等待 ' + _w) : null);
         });
         document.getElementById('call-inc-accept')?.addEventListener('click', () => {
             document.getElementById('call-incoming-overlay')?.classList.remove('visible');
             clearTimeout(S.incomingTimer);
             stopAllCallSounds();
+            stopIncomingWait();
             startCall(true);
         });
 
@@ -959,7 +1004,12 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         initDrag(); initPillDrag(); initResize();
     }
 
-    window.callFeature = { startCall, endCall, showIncomingCall, restoreWindow, minimizeWindow };
+    window.callFeature = {
+        startCall, endCall, showIncomingCall, restoreWindow, minimizeWindow,
+        lastCallInfo: function () {
+            return { waitMs: S.lastWaitMs, connectedAt: S.startTime, elapsed: S.elapsed, incomingStartedAt: S.incomingStartedAt };
+        }
+    };
 
     function init() {
         injectCSS();
