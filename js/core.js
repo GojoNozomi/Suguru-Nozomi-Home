@@ -1765,7 +1765,18 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
                 }
             }
 
-            const replyCount = Math.random() < 0.75 ? 1: (Math.random() < 0.95 ? 2: 3);
+            // 回复条数跟着「你连发了几条」走：1-3 条→回1条，4-7 条→回2条，8 条以上→回3-5条
+            let _unanswered = 0;
+            for (let k = messages.length - 1; k >= 0; k--) {
+                const _m = messages[k];
+                if (!_m) continue;
+                if (_m.sender === 'user') { _unanswered++; continue; }
+                if (_m.type === 'normal' || _m.type === 'poll') break;
+            }
+            let replyCount;
+            if (_unanswered <= 3) replyCount = 1;
+            else if (_unanswered <= 7) replyCount = 2;
+            else replyCount = 3 + Math.floor(Math.random() * 3);
             if (!customReplies || customReplies.length === 0) {
                 showNotification('回复库为空，请先到「自定义回复」中添加内容', 'info', 3500);
                 return;
@@ -1791,13 +1802,13 @@ if (partnerPersonas && partnerPersonas.length > 0 && Math.random() < 0.3) {
 
             // 确认有可用回复后再展示“正在输入中”，避免空转
             showTypingIndicator();
-            let delay = 0;
             const recentUserMsgs = settings.replyEnabled
                 ? messages.filter(m => m.sender === 'user' && m.text).slice(-10)
                 : [];
+            // 总时长封顶：1-3 条共享同一个 [min,max] 窗口，最后一条也不超过最大值
+            const _totalDelay = settings.replyDelayMin + Math.random() * Math.max(0, settings.replyDelayMax - settings.replyDelayMin);
             for (let i = 0; i < replyCount; i++) {
-                const delayRange = settings.replyDelayMax - settings.replyDelayMin;
-                delay += settings.replyDelayMin + Math.random() * delayRange;
+                const delay = _totalDelay * (i + 1) / replyCount;
                 setTimeout(() => {
                     try {
                     const replyPool = replyPoolOnce;
