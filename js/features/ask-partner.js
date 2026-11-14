@@ -33,11 +33,17 @@
         } catch (e) {}
         return '梦角';
     }
+    // 多选最多能选几个：3 个以内可全选；超过 3 个取 75%（向下取整），封顶 6
+    function maxPickCount(n) {
+        if (n <= 3) return n;
+        return Math.min(6, Math.floor(n * 0.75));
+    }
+
     function pickForPoll(mode, opts) {
         var n = opts.length;
         if (n === 0) return [];
         if (mode === 'multi') {
-            var max = Math.min(3, n);
+            var max = maxPickCount(n);
             var count = 1 + Math.floor(Math.random() * max);
             var pool = opts.map(function (_, i) { return i; });
             var idxs = [];
