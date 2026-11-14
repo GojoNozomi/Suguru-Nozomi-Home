@@ -294,7 +294,16 @@ function deduplicateContentArray(arr, baseSystemArray = []) {
             }, 500);
         };
 
-async function applyCustomFont(url) {
+function buildFontStack(primary, fallbackFamilies) {
+    const fams = [`"${primary}"`];
+    if (Array.isArray(fallbackFamilies)) {
+        fallbackFamilies.forEach(function (f) { if (f) fams.push(`"${f}"`); });
+    }
+    fams.push("'Noto Serif SC'", 'serif');
+    return fams.join(', ');
+}
+
+async function applyCustomFont(url, fallbackFamilies) {
     const linkId = 'user-custom-font-link';
     if (!url || !url.trim()) {
         document.documentElement.style.removeProperty('--font-family');
@@ -325,7 +334,7 @@ async function applyCustomFont(url) {
             link.href = url;
             await new Promise(r => setTimeout(r, 400));
 
-            const fontStack = `"${family}", 'Noto Serif SC', serif`;
+            const fontStack = buildFontStack(family, fallbackFamilies);
             document.documentElement.style.setProperty('--font-family', fontStack);
             document.documentElement.style.setProperty('--message-font-family', fontStack);
             if (typeof settings !== 'undefined') settings.messageFontFamily = fontStack;
@@ -342,7 +351,7 @@ async function applyCustomFont(url) {
         const font = new FontFace(fontName, `url(${url})`);
         await font.load();
         document.fonts.add(font);
-        const fontStack = `"${fontName}", 'Noto Serif SC', serif`;
+        const fontStack = buildFontStack(fontName, fallbackFamilies);
         document.documentElement.style.setProperty('--font-family', fontStack);
         document.documentElement.style.setProperty('--message-font-family', fontStack);
         if (typeof settings !== 'undefined') settings.messageFontFamily = fontStack;

@@ -3,7 +3,7 @@
         const APP_PREFIX = 'CHAT_APP_SUGURU_';
         // ── 版本号 & 发布日期：每次更新代码后只改下面这两个值，启动页和主页顶部会自动显示 ──
         const APP_VERSION = '5.1.0';
-        const APP_BUILD_DATE = '2026-11-14';
+        const APP_BUILD_DATE = '2026-11-15';
         const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
         const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
         const MESSAGES_PER_PAGE = 50;

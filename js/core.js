@@ -352,7 +352,7 @@ const loadData = async () => {
         }
         document.body.classList.toggle('show-partner-name', showPartnerNameInChat);
         try {
-            if (settings.customFontUrl) applyCustomFont(settings.customFontUrl);
+            if (settings.customFontUrl) applyCustomFont(settings.customFontUrl, settings.customFontFallback || null);
             if (settings.customBubbleCss) applyCustomBubbleCss(settings.customBubbleCss);
             if (settings.customGlobalCss) applyGlobalThemeCss(settings.customGlobalCss);
         } catch(e) { console.warn("样式应用失败", e); }
@@ -2301,7 +2301,7 @@ function showModal(modalElement, focusElement = null) {
                             if (importedData.settings) {
                                 Object.assign(settings, importedData.settings);
                                 try {
-                                    if (settings.customFontUrl) applyCustomFont(settings.customFontUrl);
+                                    if (settings.customFontUrl) applyCustomFont(settings.customFontUrl, settings.customFontFallback || null);
                                     if (settings.customBubbleCss) applyCustomBubbleCss(settings.customBubbleCss);
                                     if (settings.customGlobalCss) applyGlobalThemeCss(settings.customGlobalCss);
                                 } catch(e2) { console.warn('导入后样式应用失败', e2); }
