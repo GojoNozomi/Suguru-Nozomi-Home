@@ -1432,23 +1432,45 @@
         .call-event-message {
             display: flex;
             justify-content: center;
-            padding: 4px 16px;
-            margin: 4px 0;
+            padding: 6px 16px;
+            margin: 6px 0;
         }
         .call-event-pill {
             display: inline-flex;
             align-items: center;
-            gap: 7px;
-            border-radius: 20px;
-            padding: 6px 13px 6px 10px;
-            font-size: 12px;
-            font-weight: 500;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 340px;
+            box-sizing: border-box;
+            border-radius: var(--radius);
+            padding: 11px 14px;
+            font-size: 12.5px;
+            font-weight: 600;
             letter-spacing: 0.2px;
-            border: 1px solid;
+            border: 1px solid var(--border-color);
+            background: var(--message-received-bg);
+            color: var(--message-received-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
             position: relative;
             animation: systemMsgPop 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
             opacity: 0;
             transform: scale(0.9) translateY(4px);
+        }
+        /* 通话卡片：跟随气泡样式（圆角） */
+        .call-event-pill.rounded { border-radius: var(--radius); }
+        .call-event-pill.rounded-large { border-radius: 28px; }
+        .call-event-pill.square { border-radius: 8px; }
+        .call-event-pill.rounded-received { border-radius: var(--radius) var(--radius) var(--radius) 6px; }
+        /* 已结束 / 已拒绝 也统一用气泡配色（只有图标颜色不同） */
+        .call-event-pill.call-event-pill--ended,
+        .call-event-pill.call-event-pill--rejected {
+            background: var(--message-received-bg);
+            border-color: var(--border-color);
+        }
+        .call-event-pill .call-event-detail {
+            font-weight: 700;
+            color: var(--accent-color);
         }
         .call-event-pill--ended {
             background: rgba(var(--accent-color-rgb, 180,140,100), 0.06);
