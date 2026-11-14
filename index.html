@@ -211,6 +211,12 @@
                     <button class="collapsed-extra-btn" id="collapsed-call-btn" title="视频通话" onclick="(function(){document.getElementById('collapsed-extras-panel').style.display='none';document.getElementById('collapse-expand-btn').classList.remove('open');if(window.callFeature&&typeof window.callFeature.startCall==='function')window.callFeature.startCall(false);})();">
                         <i class="fas fa-video"></i>
                     </button>
+                    <button class="collapsed-extra-btn" id="ask-partner-btn-extra" title="问梦角问题" onclick="(function(){document.getElementById('collapsed-extras-panel').style.display='none';document.getElementById('collapse-expand-btn').classList.remove('open');if(window.openAskPartner)window.openAskPartner();})();">
+                        <i class="fas fa-circle-question"></i>
+                    </button>
+                    <button class="collapsed-extra-btn" id="kaomoji-quick-btn" title="颜文字" onclick="(function(){document.getElementById('collapsed-extras-panel').style.display='none';document.getElementById('collapse-expand-btn').classList.remove('open');if(window.openKaomojiQuick)window.openKaomojiQuick();})();">
+                        <i class="fas fa-face-smile"></i>
+                    </button>
                     <button class="collapsed-extra-btn" title="退出收纳" onclick="window.exitCollapseMode && window.exitCollapseMode()" style="color:#ff5050; background:rgba(255,80,80,0.1);">
                         <i class="fas fa-times"></i>
                     </button>
@@ -1348,18 +1354,21 @@
                     <div class="settings-item" id="custom-replies-function">
                         <i class="fas fa-comment-dots"></i><span>自定义回复</span>
                     </div>
-                    <div class="settings-item" id="music-player-toggle">
-                        <i class="fas fa-music"></i><span>悬浮音乐播放器</span>
-                    </div>
                     <div class="settings-item" id="stats-function">
                         <i class="fas fa-chart-bar"></i><span>消息统计</span>
                     </div>
                     <div class="settings-item" id="decision-function">
-                        <i class="fas fa-balance-scale"></i> 
-                        <span>抉择</span> 
+                        <i class="fas fa-balance-scale"></i>
+                        <span>抉择</span>
                     </div>
                     <div class="settings-item" id="fortune-lenormand-function" style="position:relative;">
                         <i class="fas fa-star-and-crescent"></i><span>运势 · 占卜</span>
+                    </div>
+                    <div class="settings-item" id="envelope-function">
+                        <i class="fas fa-envelope"></i><span>信封投递</span>
+                    </div>
+                    <div class="settings-item" id="dream-journal-function">
+                        <i class="fas fa-moon"></i><span>入梦记录</span>
                     </div>
                     <div class="settings-item" id="anniversary-function">
                         <i class="fas fa-heart"></i><span>重要日</span>
@@ -1367,8 +1376,11 @@
                     <div class="settings-item" id="mood-function">
                         <i class="fas fa-calendar-day"></i><span>心晴手账</span>
                     </div>
-                    <div class="settings-item" id="envelope-function">
-                        <i class="fas fa-envelope"></i><span>信封投递</span>
+                    <div class="settings-item" id="music-player-toggle">
+                        <i class="fas fa-music"></i><span>悬浮音乐播放器</span>
+                    </div>
+                    <div class="settings-item" id="wishlist-function">
+                        <i class="fas fa-heart"></i><span>心愿清单</span>
                     </div>
                 </div>
             </div>
@@ -2163,6 +2175,10 @@
     <script src="js/features/reply-library.js?v=5"></script>
     <script src="js/features/theme-editor.js?v=5"></script>
     <script src="js/features/group-chat.js?v=5"></script>
+    <script src="js/features/dream-journal.js?v=5"></script>
+    <script src="js/features/wishlist.js?v=5"></script>
+    <script src="js/features/ask-partner.js?v=5"></script>
+    <script src="js/features/kaomoji-quick.js?v=5"></script>
     <script src="js/features/call.js?v=5"></script>
 
     <!-- == 合并模块 == -->
