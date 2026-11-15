@@ -1526,6 +1526,11 @@
             box-sizing: border-box;
         }
         .call-card-message .letter-card-actions { right: 0; }
+        /* 通话卡片悬停时也要显示操作栏（之前漏了这条，所以看不见按钮） */
+        .call-card-message:hover .letter-card-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
         .call-event-pill.letter-card-pill {
             width: 100% !important;
             max-width: 100% !important;
