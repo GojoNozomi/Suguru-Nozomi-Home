@@ -1065,13 +1065,34 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
 
     if (msg.type === 'call-event') {
         const callEvDiv = document.createElement('div');
-        callEvDiv.className = 'call-event-message';
+        callEvDiv.className = 'call-event-message call-card-message';
         callEvDiv.dataset.id = msg.id;
         const icon = msg.callIcon || 'fa-video';
         const isRejected = icon === 'fa-phone-slash';
         const colorClass = isRejected ? 'call-event-pill--rejected' : 'call-event-pill--ended';
         const detail = msg.callDetail ? `<span class="call-event-detail">${msg.callDetail}</span>` : '';
-        callEvDiv.innerHTML = `<div class="message message-received call-event-pill ${colorClass} ${settings.bubbleStyle || 'standard'}"><i class="fas ${icon} call-event-icon"></i><span class="call-event-label">${msg.text.replace(/ · .*/, '')}</span>${detail}<button class="call-event-delete" title="删除" onclick="(function(btn){const id=btn.closest('[data-id]').dataset.id;const idx=messages.findIndex(m=>String(m.id)===String(id));if(idx>-1){messages.splice(idx,1);renderMessages();throttledSaveData();}})(this)"><i class="fas fa-times"></i></button></div>`;
+        const _cfav = !!msg.favorited;
+        callEvDiv.innerHTML = `<div class="letter-card-actions call-card-actions">
+                <button class="meta-action-btn call-card-fav" title="收藏"><i class="fas fa-star"${_cfav ? ' style="color:var(--accent-color)"' : ''}></i></button>
+                <button class="meta-action-btn call-card-del" title="删除"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="message message-received call-event-pill ${colorClass} ${settings.bubbleStyle || 'standard'}"><i class="fas ${icon} call-event-icon"></i><span class="call-event-label">${msg.text.replace(/ · .*/, '')}</span>${detail}</div>`;
+        const _cfavBtn = callEvDiv.querySelector('.call-card-fav');
+        if (_cfavBtn) _cfavBtn.addEventListener('click', function (e2) {
+            e2.stopPropagation();
+            const m = messages.find(x => String(x.id) === String(callEvDiv.dataset.id));
+            if (!m) return;
+            m.favorited = !m.favorited;
+            throttledSaveData();
+            renderMessages(true);
+        });
+        const _cdelBtn = callEvDiv.querySelector('.call-card-del');
+        if (_cdelBtn) _cdelBtn.addEventListener('click', function (e2) {
+            e2.stopPropagation();
+            if (!confirm('确定要删除这条通话记录吗？')) return;
+            const _i = messages.findIndex(x => String(x.id) === String(callEvDiv.dataset.id));
+            if (_i > -1) { messages.splice(_i, 1); throttledSaveData(); renderMessages(true); }
+        });
         fragment.appendChild(callEvDiv);
         lastSenderRef.current = 'system';
         return fragment;
