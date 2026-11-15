@@ -1499,18 +1499,35 @@
             word-break: break-word;
             line-height: 1.45;
         }
-        .letter-card-message { position: relative; }
+        /* 卡片外层：宽度与卡片一致，操作栏才能贴着卡片右上角 */
+        .letter-card-message {
+            position: relative;
+            width: calc(100% - 32px);
+            max-width: 430px;
+            margin: 6px auto;
+            padding: 6px 0;
+            box-sizing: border-box;
+        }
+        .call-event-pill.letter-card-pill { width: 100%; }
+        /* 操作栏：跟普通消息的操作栏长得完全一样 */
         .letter-card-actions {
             position: absolute;
-            top: -13px;
-            right: 8px;
+            top: -12px;
+            right: 0;
             display: flex;
-            gap: 2px;
+            padding: 4px 6px;
+            background-color: var(--secondary-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
             opacity: 0;
-            transition: opacity 0.15s;
+            transform: translateY(5px);
+            transition: var(--transition);
             z-index: 2147483000;
         }
-        .letter-card-message:hover .letter-card-actions { opacity: 1; }
+        .letter-card-message:hover .letter-card-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
         .letter-card-body {
             white-space: pre-wrap;
             line-height: 1.75;
