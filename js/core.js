@@ -1015,20 +1015,40 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
 
     if (msg.type === 'letter-card') {
         const lcWrap = document.createElement('div');
-        lcWrap.className = 'call-event-message';
+        lcWrap.className = 'call-event-message letter-card-message';
         lcWrap.dataset.id = msg.id;
         const _esc = (t) => String(t == null ? '' : t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
         const _lines = String(msg.text || '').split('\n');
         const _head = _lines[0] || '收藏信件';
         const _rest = _lines.slice(1).join('\n');
-        lcWrap.innerHTML = `<div class="message message-received call-event-pill letter-card-pill ${settings.bubbleStyle || 'standard'}">
+        const _fav = !!msg.favorited;
+        lcWrap.innerHTML = `<div class="letter-card-actions">
+                <button class="meta-action-btn letter-card-fav" title="收藏"><i class="fas fa-star"${_fav ? ' style="color:var(--accent-color)"' : ''}></i></button>
+                <button class="meta-action-btn letter-card-del" title="删除"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="message message-received call-event-pill letter-card-pill ${settings.bubbleStyle || 'standard'}">
             <div class="letter-card-head">
                 <i class="fas fa-envelope-open-text call-event-icon"></i>
                 <span class="call-event-label">${_esc(_head)}</span>
-                <button class="call-event-delete" title="删除这封信" onclick="(function(btn){const id=btn.closest('[data-id]').dataset.id;const idx=messages.findIndex(m=>String(m.id)===String(id));if(idx>-1){messages.splice(idx,1);renderMessages();throttledSaveData();}})(this)"><i class="fas fa-times"></i></button>
             </div>
             <div class="letter-card-body">${_esc(_rest)}</div>
         </div>`;
+        const _star = lcWrap.querySelector('.letter-card-fav');
+        if (_star) _star.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            const m = messages.find(x => String(x.id) === String(lcWrap.dataset.id));
+            if (!m) return;
+            m.favorited = !m.favorited;
+            throttledSaveData();
+            renderMessages(true);
+        });
+        const _del = lcWrap.querySelector('.letter-card-del');
+        if (_del) _del.addEventListener('click', function (ev) {
+            ev.stopPropagation();
+            if (!confirm('确定要删除这封收藏信吗？')) return;
+            const _i = messages.findIndex(x => String(x.id) === String(lcWrap.dataset.id));
+            if (_i > -1) { messages.splice(_i, 1); throttledSaveData(); renderMessages(true); }
+        });
         fragment.appendChild(lcWrap);
         lastSenderRef.current = 'system';
         return fragment;
