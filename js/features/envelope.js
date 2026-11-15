@@ -34,6 +34,14 @@ async function checkEnvelopeStatus() {
     let newReplyLetter = null;
     envelopeData.outbox.forEach(letter => {
         if (letter.status === 'pending' && now >= letter.replyTime) {
+            // 回复时空来信时，对方只有 30% 概率再回
+            if (letter.replyToSection === 'spacetime' && letter.replyToId) {
+                if (Math.random() >= 0.3) {
+                    letter.status = 'replied';
+                    changed = true;
+                    return;
+                }
+            }
             letter.status = 'replied';
             const replyContent = generateEnvelopeReplyText();
             const replyId = 'reply_' + Date.now() + '_' + Math.random().toString(36).substr(2,4);
@@ -150,9 +158,13 @@ window.switchEnvTab = function(tab) {
     document.getElementById('env-tab-outbox').classList.toggle('active', tab === 'outbox');
     document.getElementById('env-tab-inbox').classList.toggle('active', tab === 'inbox');
     document.getElementById('env-tab-spacetime').classList.toggle('active', tab === 'spacetime');
+    const favTabEl = document.getElementById('env-tab-favorites');
+    if (favTabEl) favTabEl.classList.toggle('active', tab === 'favorites');
     document.getElementById('env-outbox-section').style.display = tab === 'outbox' ? 'block' : 'none';
     document.getElementById('env-inbox-section').style.display = tab === 'inbox' ? 'block' : 'none';
     document.getElementById('env-spacetime-section').style.display = tab === 'spacetime' ? 'block' : 'none';
+    const favSecEl = document.getElementById('env-favorites-section');
+    if (favSecEl) favSecEl.style.display = tab === 'favorites' ? 'block' : 'none';
     document.getElementById('env-compose-form').style.display = 'none';
     document.getElementById('env-main-close-btn').style.display = 'flex';
     renderEnvelopeLists();
@@ -162,6 +174,7 @@ function renderEnvelopeLists() {
     renderOutboxList();
     renderInboxList();
     renderSpacetimeList();
+    renderFavoritesList();
     const pendingCount = envelopeData.outbox.filter(l => l.status === 'pending').length;
     const newInboxCount = envelopeData.inbox.filter(l => l.isNew).length;
     const newSpacetimeCount = envelopeData.spacetime.filter(l => l.isNew).length;
@@ -252,6 +265,57 @@ function renderInboxList() {
             <button class="env-letter-delete-btn" onclick="deleteEnvLetter(event,'inbox','${letter.id}')">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
+        </div>`;
+    }).join('');
+}
+
+function collectFavorites() {
+    const out = [];
+    ['outbox', 'inbox', 'spacetime'].forEach(sec => {
+        (envelopeData[sec] || []).forEach(letter => {
+            if (letter && letter.favorited) out.push({ sec: sec, letter: letter });
+        });
+    });
+    out.sort((a, b) => (b.letter.favTime || 0) - (a.letter.favTime || 0));
+    return out;
+}
+
+function renderFavoritesList() {
+    const list = document.getElementById('env-favorites-list');
+    if (!list) return;
+    const favs = collectFavorites();
+    const badge = document.getElementById('env-favorites-badge');
+    if (badge) { badge.textContent = favs.length; badge.style.display = favs.length > 0 ? 'inline-block' : 'none'; }
+
+    if (favs.length === 0) {
+        list.innerHTML = `<div class="env-empty">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+            <div style="font-size:14px;font-weight:500;margin-top:4px;">还没有收藏任何信</div>
+            <div style="font-size:12px;margin-top:6px;opacity:0.6;">打开一封信，点 ☆ 就能收藏到这里~</div>
+        </div>`;
+        return;
+    }
+
+    const SEC_LABEL = { outbox: '寄出', inbox: '收到', spacetime: '时空' };
+    list.innerHTML = favs.map(item => {
+        const letter = item.letter;
+        const t = letter.timestamp || letter.receivedTime || letter.sentTime || Date.now();
+        const date = new Date(t).toLocaleDateString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const preview = letter.content.length > 50 ? letter.content.substring(0, 50) + '…' : letter.content;
+        return `
+        <div class="env-letter-item" onclick="viewEnvLetter('${item.sec}','${letter.id}')">
+            <div class="env-letter-header">
+                <div class="env-letter-header-from">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                    收藏 · ${SEC_LABEL[item.sec] || ''} · ${date}
+                </div>
+                <div class="env-stamp">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+            </div>
+            <div class="env-letter-body">
+                <div class="env-letter-preview">${preview}</div>
+            </div>
         </div>`;
     }).join('');
 }
@@ -362,11 +426,30 @@ window.viewEnvLetter = function(section, id) {
     document.getElementById('env-view-edit').style.display = 'none';
     document.getElementById('env-view-edit-btn').style.display = (section === 'outbox' || section === 'spacetime') ? 'inline-flex' : 'none';
     document.getElementById('env-view-save-btn').style.display = 'none';
+
+    // 收藏按钮状态
+    const favBtn = document.getElementById('env-view-fav-btn');
+    if (favBtn) {
+        const isFav = !!letter.favorited;
+        favBtn.style.color = isFav ? 'var(--accent-color)' : '';
+        favBtn.style.borderColor = isFav ? 'var(--accent-color)' : '';
+        favBtn.title = isFav ? '取消收藏' : '收藏';
+        const poly = favBtn.querySelector('polygon');
+        if (poly) poly.setAttribute('fill', isFav ? 'currentColor' : 'none');
+    }
+    // 回复按钮：自己的寄出信不能回复
+    const replyBtn = document.getElementById('env-view-reply-btn');
+    if (replyBtn) {
+        replyBtn.dataset.mode = '';
+        replyBtn.className = 'modal-btn modal-btn-secondary';
+        replyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+        replyBtn.style.display = section === 'outbox' ? 'none' : 'inline-flex';
+    }
     const origCtx = document.getElementById('env-view-original-ctx');
     const origText = document.getElementById('env-view-original-text');
     const origExpand = document.getElementById('env-view-original-expand');
     if (origCtx && origText) {
-        if (section === 'inbox' && letter.originalContent) {
+        if (letter.originalContent) {
             origText.textContent = letter.originalContent;
             origText.style.maxHeight = '80px';
             origCtx.style.display = 'block';
@@ -379,6 +462,132 @@ window.viewEnvLetter = function(section, id) {
         }
     }
     showModal(document.getElementById('envelope-view-modal'));
+};
+
+function getLetterContentByRef(section, id) {
+    const arr = section === 'outbox' ? envelopeData.outbox : section === 'spacetime' ? envelopeData.spacetime : envelopeData.inbox;
+    const l = (arr || []).find(x => x.id === id);
+    return l ? l.content : '';
+}
+
+function writeFavoriteToChat(section, letter) {
+    if (typeof addMessage !== 'function') return null;
+    const myName = (typeof settings !== 'undefined' && settings.myName) || '我';
+    const partnerName = (typeof settings !== 'undefined' && settings.partnerName) || '梦角';
+    const from = section === 'outbox' ? myName : partnerName;
+    const to = section === 'outbox' ? partnerName : myName;
+    const d = new Date(letter.timestamp || letter.receivedTime || letter.sentTime || Date.now());
+    const wd = ['日', '一', '二', '三', '四', '五', '六'];
+    const pad = v => String(v).padStart(2, '0');
+    const dateStr = d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' 星期' + wd[d.getDay()];
+    const text = '📜 收藏信件 · ' + from + ' 写给 ' + to + '\n' + dateStr + '\n致 ' + to + '：\n' + letter.content;
+    const id = Date.now() + Math.random();
+    try {
+        addMessage({
+            id: id,
+            sender: 'system',
+            text: text,
+            timestamp: new Date(),
+            status: 'received',
+            type: 'system',
+            favorited: false,
+            note: null
+        });
+    } catch (e) { return null; }
+    return id;
+}
+
+window.toggleEnvFavorite = function() {
+    const arr = editingEnvSection === 'outbox' ? envelopeData.outbox : editingEnvSection === 'spacetime' ? envelopeData.spacetime : envelopeData.inbox;
+    const letter = (arr || []).find(l => l.id === editingEnvId);
+    if (!letter) return;
+
+    if (letter.favorited) {
+        letter.favorited = false;
+        if (letter.favMsgId) {
+            if (confirm('同时删除聊天记录里这条收藏吗？')) {
+                try {
+                    const idx = messages.findIndex(m => String(m.id) === String(letter.favMsgId));
+                    if (idx > -1) {
+                        messages.splice(idx, 1);
+                        if (typeof renderMessages === 'function') renderMessages(true);
+                        if (typeof throttledSaveData === 'function') throttledSaveData();
+                    }
+                } catch (e) {}
+                letter.favMsgId = null;
+            }
+        }
+        showNotification('已取消收藏', 'success');
+    } else {
+        letter.favorited = true;
+        letter.favTime = Date.now();
+        letter.favMsgId = writeFavoriteToChat(editingEnvSection, letter);
+        showNotification('已收藏，并写入聊天记录 ✓', 'success');
+    }
+    saveEnvelopeData();
+    renderEnvelopeLists();
+    viewEnvLetter(editingEnvSection, editingEnvId);
+};
+
+window.replyToEnvLetter = function() {
+    const contentEl = document.getElementById('env-view-content');
+    const editEl = document.getElementById('env-view-edit');
+    const editInput = document.getElementById('env-edit-input');
+    const replyBtn = document.getElementById('env-view-reply-btn');
+    const editBtn = document.getElementById('env-view-edit-btn');
+    const saveBtn = document.getElementById('env-view-save-btn');
+    if (!contentEl || !editEl || !editInput || !replyBtn) return;
+
+    const REPLY_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>';
+
+    if (replyBtn.dataset.mode === 'sending') {
+        const text = editInput.value.trim();
+        if (!text) { showNotification('回复内容不能为空', 'warning'); return; }
+
+        let minMs = 10 * 60 * 60 * 1000, maxMs = 24 * 60 * 60 * 1000;
+        if (typeof settings !== 'undefined' && settings.envelopeCustomRuleEnabled) {
+            const unitToMs = { minutes: 60000, hours: 3600000, days: 86400000 };
+            minMs = (settings.envelopeReplyMinVal || 10) * (unitToMs[settings.envelopeReplyMinUnit] || unitToMs.hours);
+            maxMs = (settings.envelopeReplyMaxVal || 24) * (unitToMs[settings.envelopeReplyMaxUnit] || unitToMs.hours);
+        }
+        const replyTime = Date.now() + (Math.random() * (maxMs - minMs) + minMs);
+
+        const newId = 'env_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        envelopeData.outbox.push({
+            id: newId,
+            content: text,
+            sentTime: Date.now(),
+            timestamp: Date.now(),
+            replyTime: replyTime,
+            status: 'pending',
+            replyToId: editingEnvId,
+            replyToSection: editingEnvSection,
+            originalContent: getLetterContentByRef(editingEnvSection, editingEnvId)
+        });
+        saveEnvelopeData();
+        renderEnvelopeLists();
+
+        contentEl.style.display = 'block';
+        editEl.style.display = 'none';
+        replyBtn.dataset.mode = '';
+        replyBtn.className = 'modal-btn modal-btn-secondary';
+        replyBtn.innerHTML = REPLY_ICON;
+        if (editBtn) editBtn.style.display = 'inline-flex';
+        if (saveBtn) saveBtn.style.display = 'none';
+        showNotification('回信已寄出，等待对方回信 ✉️', 'success');
+        return;
+    }
+
+    editInput.value = '';
+    editInput.placeholder = '写下你的回信…';
+    contentEl.style.display = 'none';
+    editEl.style.display = 'block';
+    if (editBtn) editBtn.style.display = 'none';
+    if (saveBtn) saveBtn.style.display = 'none';
+    replyBtn.dataset.mode = 'sending';
+    replyBtn.className = 'modal-btn modal-btn-primary';
+    replyBtn.innerHTML = '发送回信';
+    editInput.focus();
 };
 
 window.toggleEnvEdit = function() {
