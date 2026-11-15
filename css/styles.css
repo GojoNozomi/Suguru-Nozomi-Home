@@ -1511,6 +1511,21 @@
             padding: 6px 0;
             box-sizing: border-box;
         }
+        /* 通话记录卡片：外层与收藏卡片一致，操作栏才能贴右上角 */
+        .call-card-message {
+            position: relative;
+            width: calc(100% - 32px);
+            max-width: 430px;
+            margin: 6px auto;
+            padding: 6px 0;
+            box-sizing: border-box;
+        }
+        .call-card-message .call-event-pill {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box;
+        }
+        .call-card-message .letter-card-actions { right: 0; }
         .call-event-pill.letter-card-pill {
             width: 100% !important;
             max-width: 100% !important;
