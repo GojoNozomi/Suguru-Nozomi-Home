@@ -1019,7 +1019,7 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
         lcWrap.dataset.id = msg.id;
         const _esc = (t) => String(t == null ? '' : t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
         const _lines = String(msg.text || '').split('\n');
-        const _head = _lines[0] || '收藏信件';
+        const _head = (_lines[0] || '收藏信件').replace(/^📜\s*/, '');
         const _rest = _lines.slice(1).join('\n');
         const _fav = !!msg.favorited;
         lcWrap.innerHTML = `<div class="letter-card-actions">
