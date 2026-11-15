@@ -480,7 +480,7 @@ function writeFavoriteToChat(section, letter) {
     const wd = ['日', '一', '二', '三', '四', '五', '六'];
     const pad = v => String(v).padStart(2, '0');
     const dateStr = d.getFullYear() + '/' + pad(d.getMonth() + 1) + '/' + pad(d.getDate()) + ' 星期' + wd[d.getDay()];
-    const text = '📜 收藏信件 · ' + from + ' 写给 ' + to + '\n' + dateStr + '\n致 ' + to + '：\n' + letter.content;
+    const text = '收藏信件 · ' + from + ' 写给 ' + to + '\n' + dateStr + '\n致 ' + to + '：\n' + letter.content;
     const id = Date.now() + Math.random();
     try {
         addMessage({
