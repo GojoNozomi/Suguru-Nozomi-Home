@@ -1492,7 +1492,25 @@
             align-items: center;
             gap: 7px;
         }
-        .letter-card-head .call-event-label { flex: 1; text-align: left; }
+        .letter-card-head .call-event-label {
+            flex: 1;
+            text-align: left;
+            white-space: normal;
+            word-break: break-word;
+            line-height: 1.45;
+        }
+        .letter-card-message { position: relative; }
+        .letter-card-actions {
+            position: absolute;
+            top: -13px;
+            right: 8px;
+            display: flex;
+            gap: 2px;
+            opacity: 0;
+            transition: opacity 0.15s;
+            z-index: 2147483000;
+        }
+        .letter-card-message:hover .letter-card-actions { opacity: 1; }
         .letter-card-body {
             white-space: pre-wrap;
             line-height: 1.75;
