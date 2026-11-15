@@ -1073,11 +1073,17 @@
             opacity: 0;
             transform: translateY(5px);
             transition: var(--transition);
-            z-index: 60;
+            z-index: 2147483000 !important;
         }
         /* 悬停中的消息整体提到最上层，保证操作栏不被装饰图/贴图盖住 */
         .message-wrapper:hover {
-            z-index: 40;
+            z-index: 2147482000 !important;
+        }
+        /* 双保险：操作栏永远盖在气泡及其装饰之上（第三方气泡 CSS 可能用 z-index:999+） */
+        .message-wrapper:hover .message-meta-actions,
+        .message-content-wrapper:hover .message-meta-actions {
+            z-index: 2147483000 !important;
+            position: absolute !important;
         }
         .message-content-wrapper:hover .message-meta-actions {
             opacity: 1;
@@ -1400,6 +1406,10 @@
             align-self: center;
             background: transparent;
             color: var(--text-secondary);
+            white-space: pre-wrap;
+            text-align: left;
+            max-width: 82%;
+            line-height: 1.7;
             font-size: 12px;
             padding: 5px 20px;
             border-radius: 0;
