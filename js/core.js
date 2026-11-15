@@ -1013,6 +1013,27 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
         lastSenderRef.current = null;
     }
 
+    if (msg.type === 'letter-card') {
+        const lcWrap = document.createElement('div');
+        lcWrap.className = 'call-event-message';
+        lcWrap.dataset.id = msg.id;
+        const _esc = (t) => String(t == null ? '' : t).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+        const _lines = String(msg.text || '').split('\n');
+        const _head = _lines[0] || '收藏信件';
+        const _rest = _lines.slice(1).join('\n');
+        lcWrap.innerHTML = `<div class="message message-received call-event-pill letter-card-pill ${settings.bubbleStyle || 'standard'}">
+            <div class="letter-card-head">
+                <i class="fas fa-envelope-open-text call-event-icon"></i>
+                <span class="call-event-label">${_esc(_head)}</span>
+                <button class="call-event-delete" title="删除这封信" onclick="(function(btn){const id=btn.closest('[data-id]').dataset.id;const idx=messages.findIndex(m=>String(m.id)===String(id));if(idx>-1){messages.splice(idx,1);renderMessages();throttledSaveData();}})(this)"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="letter-card-body">${_esc(_rest)}</div>
+        </div>`;
+        fragment.appendChild(lcWrap);
+        lastSenderRef.current = 'system';
+        return fragment;
+    }
+
     if (msg.type === 'system') {
         const systemMsgDiv = document.createElement('div');
         systemMsgDiv.className = 'system-message';
