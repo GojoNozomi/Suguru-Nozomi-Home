@@ -13,14 +13,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/T59zjyf8/IMG-8618.jpg">
-    <link rel="apple-touch-icon" href="https://i.postimg.cc/T59zjyf8/IMG-8618.jpg">
-    <meta name="apple-mobile-web-app-title" content="ʚSuguruɞ">
+    <link rel="icon" type="image/png" sizes="192x192" href="https://i.postimg.cc/R699cxKs/IMG-1790.jpg">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/R699cxKs/IMG-1790.jpg">
+    <meta name="apple-mobile-web-app-title" content="ʚSatoruɞ">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-    <link rel="stylesheet" href="css/styles.css?v=22">
+    <link rel="stylesheet" href="css/styles.css?v=25">
 
     <style id="css-live-preview-style"></style>
 </head>
@@ -333,6 +333,10 @@
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/><path d="M2 12h20"/></svg>时空来信
                     <span id="env-spacetime-badge" class="env-badge" style="display:none;"></span>
                 </button>
+                <button class="env-tab-btn" id="env-tab-favorites" onclick="switchEnvTab('favorites')">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:4px;"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>收藏
+                    <span id="env-favorites-badge" class="env-badge" style="display:none;"></span>
+                </button>
             </div>
 
             <div id="env-outbox-section">
@@ -345,6 +349,10 @@
 
             <div id="env-spacetime-section" style="display:none;">
                 <div id="env-spacetime-list"></div>
+            </div>
+
+            <div id="env-favorites-section" style="display:none;">
+                <div id="env-favorites-list"></div>
             </div>
 
             <div id="env-compose-form" style="display:none;">
@@ -435,6 +443,8 @@
 
         <div class="modal-buttons" style="margin:0;padding:12px 18px 16px;border-top:1px solid var(--border-color);flex-shrink:0;">
             <button class="modal-btn modal-btn-secondary" id="close-env-view" onclick="closeEnvViewModal()">关闭</button>
+            <button class="modal-btn modal-btn-secondary" id="env-view-fav-btn" onclick="toggleEnvFavorite()" title="收藏" style="padding:10px 13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
+            <button class="modal-btn modal-btn-secondary" id="env-view-reply-btn" onclick="replyToEnvLetter()" title="回复" style="padding:10px 13px;display:none;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg></button>
             <button class="modal-btn modal-btn-secondary" id="env-view-edit-btn" onclick="toggleEnvEdit()">编辑</button>
             <button class="modal-btn modal-btn-primary" id="env-view-save-btn" onclick="saveEnvEdit()" style="display:none;">保存</button>
         </div>
@@ -1148,6 +1158,7 @@
                             </label>
                         </div>
                     </div>
+
                     <p class="cs-group-label" style="margin-top:4px;">来电频率</p>
                     <div class="cs-card">
                         <div class="setting-pill-row" style="cursor:default;">
@@ -2189,32 +2200,32 @@
 
 <div id="dg-editor-modal" style="display:none;"></div>
     <!-- == 核心层 == -->
-    <script src="js/config.js?v=22"></script>
-    <script src="js/utils.js?v=22"></script>
-    <script src="js/backup-engine.js?v=22"></script>
-    <script src="js/state.js?v=22"></script>
-    <script src="js/core.js?v=22"></script>
+    <script src="js/config.js?v=25"></script>
+    <script src="js/utils.js?v=25"></script>
+    <script src="js/backup-engine.js?v=25"></script>
+    <script src="js/state.js?v=25"></script>
+    <script src="js/core.js?v=25"></script>
 
     <!-- == 功能模块 == -->
-    <script src="js/features/mood.js?v=22"></script>
-    <script src="js/features/envelope.js?v=22"></script>
-    <script src="js/features/reply-library.js?v=22"></script>
-    <script src="js/features/theme-editor.js?v=22"></script>
-    <script src="js/features/font-presets.js?v=22"></script>
-    <script src="js/features/group-chat.js?v=22"></script>
-    <script src="js/features/dream-journal.js?v=22"></script>
-    <script src="js/features/wishlist.js?v=22"></script>
-    <script src="js/features/ask-partner.js?v=22"></script>
-    <script src="js/features/kaomoji-quick.js?v=22"></script>
-    <script src="js/features/call.js?v=22"></script>
+    <script src="js/features/mood.js?v=25"></script>
+    <script src="js/features/envelope.js?v=25"></script>
+    <script src="js/features/reply-library.js?v=25"></script>
+    <script src="js/features/theme-editor.js?v=25"></script>
+    <script src="js/features/font-presets.js?v=25"></script>
+    <script src="js/features/group-chat.js?v=25"></script>
+    <script src="js/features/dream-journal.js?v=25"></script>
+    <script src="js/features/wishlist.js?v=25"></script>
+    <script src="js/features/ask-partner.js?v=25"></script>
+    <script src="js/features/kaomoji-quick.js?v=25"></script>
+    <script src="js/features/call.js?v=25"></script>
 
     <!-- == 合并模块 == -->
-    <script src="js/games.js?v=22"></script> 
-    <script src="js/features.js?v=22"></script> 
-    <script src="js/data.js?v=22"></script>
-    <script src="js/onboarding.js?v=22"></script> 
-    <script src="js/listeners.js?v=22"></script>
-    <script src="js/app.js?v=22"></script>
+    <script src="js/games.js?v=25"></script> 
+    <script src="js/features.js?v=25"></script> 
+    <script src="js/data.js?v=25"></script>
+    <script src="js/onboarding.js?v=25"></script> 
+    <script src="js/listeners.js?v=25"></script>
+    <script src="js/app.js?v=25"></script>
     <script>
         (function () {
             var v = (window.APP_VERSION || '5.0.0') + ' · ' + (window.APP_BUILD_DATE || '');
