@@ -1511,7 +1511,16 @@
             padding: 6px 0;
             box-sizing: border-box;
         }
-        .call-event-pill.letter-card-pill { width: 100%; }
+        .call-event-pill.letter-card-pill {
+            width: 100% !important;
+            max-width: 100% !important;
+            align-self: stretch;
+            box-sizing: border-box;
+        }
+        .letter-card-head {
+            width: 100%;
+            box-sizing: border-box;
+        }
         /* 操作栏：跟普通消息的操作栏长得完全一样 */
         .letter-card-actions {
             position: absolute;
