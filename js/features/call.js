@@ -27,6 +27,8 @@
         incomingTickTimer: null,
         incomingStartedAt: null,
         lastWaitMs: null,
+        dialStartedAt: null,
+        lastOutgoingWaitMs: null,
         connectingTimer: null,
         outgoingTimeoutTimer: null, // 去电强制挂断安全计时器（10 分钟无应答）
         randomCallTimer: null,
@@ -599,8 +601,13 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
 
     function sendCallMsg(dur) {
         if (dur < 2000) return;
-        const waitStr = S.lastWaitMs ? fmtWait(S.lastWaitMs) : '';
-        const detail = '通话 ' + fmt(dur) + (waitStr ? ' · 等待 ' + waitStr : '');
+        // 他打给我 → 显示"等待"（我让他等的）
+        // 我打给他 → 显示"等待接通"（他让我等的）
+        const waitStr = (S.isPartnerCall && S.lastWaitMs) ? fmtWait(S.lastWaitMs) : '';
+        const ringStr = (!S.isPartnerCall && S.lastOutgoingWaitMs) ? fmtWait(S.lastOutgoingWaitMs) : '';
+        const detail = '通话 ' + fmt(dur)
+            + (waitStr ? ' · 等待 ' + waitStr : '')
+            + (ringStr ? ' · 等待接通 ' + ringStr : '');
         sendCallEvent('fa-video', '视频通话已结束', detail);
     }
 
@@ -608,6 +615,8 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
         if (!S.enabled) return;
         S.active = true; S.startTime = null; S.elapsed = 0;
         S.minimized = false; S.isPartnerCall = !!isPartner; S.immersive = false;
+        // 自己打出去的电话没有"等待"概念，清掉上一次来电残留的等待时长
+        if (!isPartner) { S.lastWaitMs = null; S.dialStartedAt = Date.now(); S.lastOutgoingWaitMs = null; }
         document.getElementById('call-window')?.classList.remove('immersive');
 
         ['call-inc-avatar','call-conn-avatar','call-win-avatar','call-mini-av'].forEach(fillAv);
@@ -634,6 +643,8 @@ html:not([data-theme="dark"])[data-color-theme="black-white"] .message-sent{
             S.connectingTimer = setTimeout(() => {
                 if (!S.active) return;
                 S.startTime = Date.now();
+                // 记录"我等了多久他才接"
+                S.lastOutgoingWaitMs = S.dialStartedAt ? (Date.now() - S.dialStartedAt) : null;
                 if (conn) conn.classList.remove('visible');
                 if (body) body.style.display = '';
                 stopAllCallSounds();
