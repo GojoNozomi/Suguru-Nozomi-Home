@@ -1420,7 +1420,7 @@
             border-radius: var(--poke-radius, 18px);
             background: rgba(var(--poke-bg-rgb, var(--accent-color-rgb)), var(--poke-bg-alpha, 0.16));
             color: var(--poke-text, var(--text-primary));
-            font-size: 18px;
+            font-size: var(--poke-font-size, 18px);
             font-weight: var(--poke-weight, 600);
             line-height: 1.5;
             letter-spacing: 0.3px;
