@@ -1054,6 +1054,15 @@ function createMessageFragment(msg, prevMsg, nextMsg, lastSenderRef) {
         return fragment;
     }
 
+    if (msg.type === 'poke') {
+        const pokeDiv = document.createElement('div');
+        pokeDiv.className = 'poke-message';
+        pokeDiv.innerHTML = `<div class="poke-card">${msg.text}</div>`;
+        fragment.appendChild(pokeDiv);
+        lastSenderRef.current = 'system';
+        return fragment;
+    }
+
     if (msg.type === 'system') {
         const systemMsgDiv = document.createElement('div');
         systemMsgDiv.className = 'system-message';
@@ -1517,7 +1526,7 @@ const addMessage = (message) => {
                 ? window._formatPartnerPokeText(`${settings.partnerName} ${pokeAction}`)
                 : `${settings.partnerName} ${pokeAction}`;
 
-            addMessage({ id: Date.now(), text: pokeText, timestamp: new Date(), type: 'system' });
+            addMessage({ id: Date.now(), text: pokeText, timestamp: new Date(), type: 'poke' });
             if (typeof playSound === 'function') playSound('partner_poke');
             (function(){try{if(window._typingIndicatorAutoHideTimer){clearTimeout(window._typingIndicatorAutoHideTimer);window._typingIndicatorAutoHideTimer=null;}}catch(e){}var _tiW=document.getElementById('typing-indicator-wrapper');if(_tiW){var _tiInner=_tiW.querySelector('.typing-indicator');if(_tiInner){_tiInner.classList.add('hiding');setTimeout(function(){_tiW.style.display='none';if(_tiInner)_tiInner.classList.remove('hiding');},240);}else{_tiW.style.display='none';}}})();
         };
