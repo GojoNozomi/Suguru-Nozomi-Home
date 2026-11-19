@@ -2,7 +2,7 @@
 (function () {
     'use strict';
 
-    var DEFAULTS = { bg: null, text: null, alpha: 16, radius: 18, weight: 600 };
+    var DEFAULTS = { bg: null, text: null, alpha: 16, radius: 18, weight: 600, size: 18 };
 
     function getStyle() {
         var s = {};
@@ -12,7 +12,8 @@
             text: s.text || null,
             alpha: typeof s.alpha === 'number' ? s.alpha : DEFAULTS.alpha,
             radius: typeof s.radius === 'number' ? s.radius : DEFAULTS.radius,
-            weight: typeof s.weight === 'number' ? s.weight : DEFAULTS.weight
+            weight: typeof s.weight === 'number' ? s.weight : DEFAULTS.weight,
+            size: typeof s.size === 'number' ? s.size : DEFAULTS.size
         };
     }
 
@@ -34,6 +35,7 @@
         root.style.setProperty('--poke-bg-alpha', String(st.alpha / 100));
         root.style.setProperty('--poke-radius', st.radius + 'px');
         root.style.setProperty('--poke-weight', String(st.weight));
+        root.style.setProperty('--poke-font-size', st.size + 'px');
         if (st.text) root.style.setProperty('--poke-text', st.text);
         else root.style.removeProperty('--poke-text');
     }
@@ -59,6 +61,8 @@
         var op = document.getElementById('poke-opacity');
         var ra = document.getElementById('poke-radius');
         var we = document.getElementById('poke-weight');
+        var fs = document.getElementById('poke-font-size');
+        if (fs) fs.value = st.size;
         if (bg && st.bg) bg.value = st.bg;
         if (tx && st.text) tx.value = st.text;
         if (op) op.value = st.alpha;
@@ -67,6 +71,7 @@
         setText('poke-opacity-val', st.alpha + '%');
         setText('poke-radius-val', st.radius + 'px');
         setText('poke-weight-val', String(st.weight));
+        setText('poke-font-size-val', st.size + 'px');
         var bgFollow = document.getElementById('poke-bg-follow');
         var txFollow = document.getElementById('poke-text-follow');
         if (bgFollow) bgFollow.style.opacity = st.bg ? '1' : '0.55';
@@ -101,6 +106,11 @@
         if (ra && ra.dataset.pokeBound !== '1') {
             ra.dataset.pokeBound = '1';
             ra.addEventListener('input', function () { save({ radius: Number(ra.value) }); });
+        }
+        var fs = document.getElementById('poke-font-size');
+        if (fs && fs.dataset.pokeBound !== '1') {
+            fs.dataset.pokeBound = '1';
+            fs.addEventListener('input', function () { save({ size: Number(fs.value) }); });
         }
         var we = document.getElementById('poke-weight');
         if (we && we.dataset.pokeBound !== '1') {
