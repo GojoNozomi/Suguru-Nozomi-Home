@@ -1356,7 +1356,11 @@ function deleteItem(index) {
     else if (currentSubTab === 'statuses') customStatuses.splice(index, 1);
     else if (currentSubTab === 'mottos') customMottos.splice(index, 1);
     else if (currentSubTab === 'intros') customIntros.splice(index, 1);
-    else if (currentSubTab === 'kaomojis') kaomojiLibrary.splice(index, 1);
+    else if (currentSubTab === 'kaomojis') {
+        kaomojiLibrary.splice(index, 1);
+        // 删的是系统内置的，也永久记下来，以后不再出现
+        if (item && typeof window.removeKaomojiPermanent === 'function') window.removeKaomojiPermanent(item);
+    }
     if (item && ctx.groups) {
         ctx.groups.forEach(g => { if (g.items) g.items = g.items.filter(t => t !== item); });
     }
@@ -2516,3 +2520,26 @@ function applyAllAvatarFrames() {
         document.documentElement.style.setProperty('--avatar-corner-radius', settings.avatarCornerRadius + 'px');
     }
 }
+
+/* 首次运行：把系统内置颜文字灌进"字卡→颜文字"，只灌一次，之后删了也不会回来 */
+(function seedKaomojiIntoLibrary() {
+    function go() {
+        try {
+            var key = (typeof getStorageKey === 'function') ? getStorageKey('kaomojiSeeded') : 'kaomojiSeeded';
+            if (localStorage.getItem(key) === '1') return;
+            var fb = (typeof window.getKaomojiFallback === 'function') ? window.getKaomojiFallback() : [];
+            if (!fb.length) return;
+            if (typeof kaomojiLibrary === 'undefined' || !Array.isArray(kaomojiLibrary)) return;
+            fb.forEach(function (k) {
+                var v = String(k == null ? '' : k).trim();
+                if (v && kaomojiLibrary.indexOf(v) === -1) kaomojiLibrary.push(v);
+            });
+            localStorage.setItem(key, '1');
+            if (typeof throttledSaveData === 'function') throttledSaveData();
+            if (typeof renderReplyLibrary === 'function') renderReplyLibrary();
+        } catch (e) {}
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(go, 600); });
+    else setTimeout(go, 600);
+    setTimeout(go, 2500);
+})();
