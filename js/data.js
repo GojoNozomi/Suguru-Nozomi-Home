@@ -743,12 +743,8 @@ function updateStorageUsageBar() {
 
                     if (bar) {
                         bar.style.width = pct + '%';
-                        if (parseFloat(pct) > 80)
-                            bar.style.background = 'linear-gradient(90deg,#FF3B30,#CC0000)';
-                        else if (parseFloat(pct) > 50)
-                            bar.style.background = 'linear-gradient(90deg,#FF9F0A,#E07000)';
-                        else
-                            bar.style.background = 'linear-gradient(90deg,var(--accent-color),rgba(var(--accent-color-rgb),0.6))';
+                        // 进度条统一跟随主题色，不再用刺眼的红/橙
+                        bar.style.background = 'linear-gradient(90deg, var(--accent-color), rgba(var(--accent-color-rgb), 0.45))';
                     }
                     if (text) text.textContent = fmt(total) + ' / ~5 MB (' + pct + '%)';
                 });

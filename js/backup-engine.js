@@ -198,6 +198,8 @@
 
     function shouldSkipKeyGroupChat(key, flags) {
         if (!key) return true;
+        // 旧版 CHAT_APP_V3_ 数据永不打包，防止全量备份把它带到别的设备
+        if (key.indexOf('CHAT_APP_V3_') !== -1) return true;
         if (key.startsWith('annHeaderBg_')) return true;
         if (key.indexOf('dg_header_bg') !== -1 || key.indexOf('dg_overlay_bg') !== -1) return true;
         var patterns = buildModuleSkipPatterns(flags || {});
@@ -505,6 +507,8 @@
 
         for (var i = 0; i < lfKeys.length; i++) {
             var lk = lfKeys[i];
+            // 旧备份里的 CHAT_APP_V3_ 数据不恢复，避免又被灌回来
+            if (lk.indexOf('CHAT_APP_V3_') !== -1) continue;
             var targetKey = needRemap ? remapLfKey(lk, backupSid, curSid, appPfx) : lk;
             targetKey = remapPrefix(targetKey, appPfx, curPfx);
             var val = inlineMediaTree(lfRaw[lk], mediaStore);
