@@ -80,6 +80,11 @@
         +       '<div class="dm-row-info"><div class="dm-row-title">后台消息推送</div><div class="dm-row-desc" id="notif-status-text">收到新消息时弹出提醒</div></div>'
         +       '<label class="dm-toggle-pill"><input type="checkbox" id="notif-permission-toggle" onchange="handleNotifToggle(this)"><span class="dm-toggle-slider"></span></label>'
         +     '</div>'
+        +     '<div class="dm-row-item">'
+        +       '<div class="dm-row-icon slate"><i class="fas fa-bug"></i></div>'
+        +       '<div class="dm-row-info"><div class="dm-row-title">调试控制台</div><div class="dm-row-desc" id="dbg-console-status">开启后右下角显示小齿轮</div></div>'
+        +       '<label class="dm-toggle-pill"><input type="checkbox" id="dbg-console-toggle" onchange="handleDebugConsoleToggle(this)"><span class="dm-toggle-slider"></span></label>'
+        +     '</div>'
         +   '</div>'
 
         +   '<div class="dm-section-label danger-label"><i class="fas fa-triangle-exclamation"></i> 危险操作</div>'
@@ -714,6 +719,7 @@ if (!window._ghSyncInterceptorInstalled) {
 /* ☁️ ========================================== ☁️ */
 
 function updateStorageUsageBar() {
+    if (typeof window.syncDebugConsoleToggle === 'function') window.syncDebugConsoleToggle();
     var bar   = document.getElementById('dm-storage-bar')   || document.getElementById('storage-usage-fill');
     var text  = document.getElementById('dm-storage-total') || document.getElementById('storage-usage-text');
     if (!bar && !text) return;
@@ -798,6 +804,26 @@ window._sendPartnerNotification = function(title, body) {
             renotify: true
         });
     } catch(e) {}
+};
+
+window.handleDebugConsoleToggle = function (checkbox) {
+    var on = !!(checkbox && checkbox.checked);
+    try { localStorage.setItem('debugConsole', on ? '1' : '0'); } catch (e) {}
+    var st = document.getElementById('dbg-console-status');
+    if (st) st.textContent = on ? '已开启 — 刷新页面后右下角出现小齿轮' : '已关闭 — 刷新页面后小齿轮消失';
+    if (typeof showNotification === 'function') {
+        showNotification(on ? '调试控制台已开启，刷新后生效' : '调试控制台已关闭，刷新后生效', 'success', 2600);
+    }
+};
+
+window.syncDebugConsoleToggle = function () {
+    var el = document.getElementById('dbg-console-toggle');
+    if (!el) return;
+    var on = false;
+    try { on = localStorage.getItem('debugConsole') === '1'; } catch (e) {}
+    el.checked = on;
+    var st = document.getElementById('dbg-console-status');
+    if (st && on) st.textContent = '已开启 — 右下角显示小齿轮';
 };
 
 window.handleNotifToggle = function(checkbox) {
