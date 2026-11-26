@@ -20,7 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-    <link rel="stylesheet" href="css/styles.css?v=42">
+    <link rel="stylesheet" href="css/styles.css?v=44">
 
     <style id="css-live-preview-style"></style>
 </head>
@@ -2247,33 +2247,33 @@
 
 <div id="dg-editor-modal" style="display:none;"></div>
     <!-- == 核心层 == -->
-    <script src="js/config.js?v=42"></script>
-    <script src="js/utils.js?v=42"></script>
-    <script src="js/backup-engine.js?v=42"></script>
-    <script src="js/state.js?v=42"></script>
-    <script src="js/core.js?v=42"></script>
+    <script src="js/config.js?v=44"></script>
+    <script src="js/utils.js?v=44"></script>
+    <script src="js/backup-engine.js?v=44"></script>
+    <script src="js/state.js?v=44"></script>
+    <script src="js/core.js?v=44"></script>
 
     <!-- == 功能模块 == -->
-    <script src="js/features/mood.js?v=42"></script>
-    <script src="js/features/envelope.js?v=42"></script>
-    <script src="js/features/reply-library.js?v=42"></script>
-    <script src="js/features/theme-editor.js?v=42"></script>
-    <script src="js/features/font-presets.js?v=42"></script>
-    <script src="js/features/group-chat.js?v=42"></script>
-    <script src="js/features/dream-journal.js?v=42"></script>
-    <script src="js/features/wishlist.js?v=42"></script>
-    <script src="js/features/ask-partner.js?v=42"></script>
-    <script src="js/features/kaomoji-quick.js?v=42"></script>
-    <script src="js/features/call.js?v=42"></script>
-    <script src="js/features/poke-style.js?v=42"></script>
+    <script src="js/features/mood.js?v=44"></script>
+    <script src="js/features/envelope.js?v=44"></script>
+    <script src="js/features/reply-library.js?v=44"></script>
+    <script src="js/features/theme-editor.js?v=44"></script>
+    <script src="js/features/font-presets.js?v=44"></script>
+    <script src="js/features/group-chat.js?v=44"></script>
+    <script src="js/features/dream-journal.js?v=44"></script>
+    <script src="js/features/wishlist.js?v=44"></script>
+    <script src="js/features/ask-partner.js?v=44"></script>
+    <script src="js/features/kaomoji-quick.js?v=44"></script>
+    <script src="js/features/call.js?v=44"></script>
+    <script src="js/features/poke-style.js?v=44"></script>
 
     <!-- == 合并模块 == -->
-    <script src="js/games.js?v=42"></script> 
-    <script src="js/features.js?v=42"></script> 
-    <script src="js/data.js?v=42"></script>
-    <script src="js/onboarding.js?v=42"></script> 
-    <script src="js/listeners.js?v=42"></script>
-    <script src="js/app.js?v=42"></script>
+    <script src="js/games.js?v=44"></script> 
+    <script src="js/features.js?v=44"></script> 
+    <script src="js/data.js?v=44"></script>
+    <script src="js/onboarding.js?v=44"></script> 
+    <script src="js/listeners.js?v=44"></script>
+    <script src="js/app.js?v=44"></script>
     <script>
         (function () {
             var v = (window.APP_VERSION || '5.0.0') + ' · ' + (window.APP_BUILD_DATE || '');
@@ -2288,7 +2288,9 @@
     </script>
     <!-- 📱 手机调试控制台：网址加 ?debug=1 才加载，平时不出现 -->
     <script>
-    if (location.search.indexOf('debug=1') > -1) {
+    var _dbgSwitch = false;
+    try { _dbgSwitch = localStorage.getItem('debugConsole') === '1'; } catch (e) {}
+    if (location.search.indexOf('debug=1') > -1 || _dbgSwitch) {
         var _dbg = document.createElement('script');
         _dbg.src = 'https://cdn.jsdelivr.net/npm/eruda@3.0.1/eruda.min.js';
         _dbg.onload = function () {
