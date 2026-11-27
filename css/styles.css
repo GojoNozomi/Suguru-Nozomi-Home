@@ -617,8 +617,8 @@
                 radial-gradient(650px 340px at 90% 10%, rgba(var(--accent-color-rgb,197,164,126), 0.05) 0%, transparent 62%),
                 linear-gradient(180deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0) 48%, rgba(0,0,0,0.03) 100%),
                 var(--chat-bg-image, linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0)));
-            background-size: cover;
-            background-position: center center;
+            background-size: var(--chat-bg-size, cover);
+            background-position: var(--chat-bg-position, center center);
             background-repeat: no-repeat;
             transition: background-color 0.5s ease;
             will-change: transform;
@@ -745,10 +745,10 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 10px;
+        font-size: 11px;
         font-family: 'Inter', 'Noto Serif SC', 'Cormorant Garamond', serif, -apple-system, BlinkMacSystemFont, sans-serif;
-        font-weight: 350;
-        letter-spacing: 3px;
+        font-weight: 500;
+        letter-spacing: 2px;
         font-style: normal;
         text-transform: uppercase;
         color: var(--accent-color);
@@ -758,7 +758,7 @@
         box-shadow: none;
         transition: all 0.6s cubic-bezier(0.25, 0.1, 0.15, 1);
         gap: 14px;
-        opacity: 0.7;
+        opacity: 1;
         mix-blend-mode: normal;
         backdrop-filter: none;
         -webkit-backdrop-filter: none;
@@ -770,7 +770,7 @@
         }
         @keyframes mottoFadeIn {
     from { opacity: 0; }
-    to { opacity: 0.8; }
+    to { opacity: 1; }
         }
 
         .header-motto::before,
@@ -798,9 +798,9 @@
 
         html[data-theme="dark"] .header-motto {
         color: var(--accent-color);
-        opacity: 0.88;
-        text-shadow: 0 0 18px rgba(var(--accent-color-rgb), 0.25);
-        font-weight: 300;
+        opacity: 1;
+        text-shadow: 0 0 8px rgba(var(--accent-color-rgb), 0.18);
+        font-weight: 500;
         }
 
         html[data-theme="dark"] .header-motto::before,
