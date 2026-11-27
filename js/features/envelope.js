@@ -95,7 +95,7 @@ const APPEARANCE_PANEL_TITLES = {
 };
 window.showAppearancePanel = function(panel) {
     const panelMap = {
-        'font-bg': ['font', 'background'],
+        'font-bg': ['background', 'font'],
         'bubble-css': ['bubble', 'css']
     };
     document.getElementById('appearance-nav-grid').style.display = 'none';
