@@ -731,7 +731,10 @@
         position: relative;
         top: auto;
         left: auto;
-        transform: none;
+        /* 独立合成层 + 强制回栅格化，修复 iOS 上文字模糊 */
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -766,8 +769,8 @@
         z-index: 1;
         }
         @keyframes mottoFadeIn {
-    from { opacity: 0; letter-spacing: 6px; }
-    to { opacity: 0.8; letter-spacing: 3px; }
+    from { opacity: 0; }
+    to { opacity: 0.8; }
         }
 
         .header-motto::before,
