@@ -20,7 +20,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-    <link rel="stylesheet" href="css/styles.css?v=46">
+    <link rel="stylesheet" href="css/styles.css?v=47">
 
     <style id="css-live-preview-style"></style>
 </head>
@@ -685,6 +685,38 @@
                 <button class="modal-btn modal-btn-secondary" id="reset-default-bg" style="font-size: 12px; padding: 6px 12px;">
                     <i class="fas fa-undo"></i> 恢复默认背景
                 </button>
+            </div>
+
+            <div class="settings-section-title" style="margin-top:18px;"><i class="fas fa-expand"></i>显示方式</div>
+            <div class="settings-item-list" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div class="settings-item" data-bg-fit="cover" style="justify-content:center;">
+                    <i class="fas fa-crop-simple"></i><span>填充裁切</span>
+                </div>
+                <div class="settings-item" data-bg-fit="contain" style="justify-content:center;">
+                    <i class="fas fa-expand"></i><span>完整适应</span>
+                </div>
+                <div class="settings-item" data-bg-fit="100% 100%" style="justify-content:center;">
+                    <i class="fas fa-arrows-left-right"></i><span>拉伸铺满</span>
+                </div>
+                <div class="settings-item" data-bg-fit="auto" style="justify-content:center;">
+                    <i class="fas fa-image"></i><span>原始大小</span>
+                </div>
+            </div>
+
+            <div class="settings-section-title" style="margin-top:18px;"><i class="fas fa-align-center"></i>背景位置</div>
+            <div class="settings-item-list" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                <div class="settings-item" data-bg-pos="top" style="justify-content:center;">
+                    <i class="fas fa-arrow-up"></i><span>顶部</span>
+                </div>
+                <div class="settings-item" data-bg-pos="center" style="justify-content:center;">
+                    <i class="fas fa-arrows-up-down"></i><span>居中</span>
+                </div>
+                <div class="settings-item" data-bg-pos="bottom" style="justify-content:center;">
+                    <i class="fas fa-arrow-down"></i><span>底部</span>
+                </div>
+            </div>
+            <div style="font-size:11px;color:var(--text-secondary);margin-top:10px;opacity:0.7;line-height:1.5;">
+                提示：「填充裁切」会裁掉超出屏幕的部分；「完整适应」会显示整张图但可能留边。
             </div>
         </div>
     </div>
@@ -2247,33 +2279,34 @@
 
 <div id="dg-editor-modal" style="display:none;"></div>
     <!-- == 核心层 == -->
-    <script src="js/config.js?v=46"></script>
-    <script src="js/utils.js?v=46"></script>
-    <script src="js/backup-engine.js?v=46"></script>
-    <script src="js/state.js?v=46"></script>
-    <script src="js/core.js?v=46"></script>
+    <script src="js/config.js?v=47"></script>
+    <script src="js/utils.js?v=47"></script>
+    <script src="js/backup-engine.js?v=47"></script>
+    <script src="js/state.js?v=47"></script>
+    <script src="js/core.js?v=47"></script>
 
     <!-- == 功能模块 == -->
-    <script src="js/features/mood.js?v=46"></script>
-    <script src="js/features/envelope.js?v=46"></script>
-    <script src="js/features/reply-library.js?v=46"></script>
-    <script src="js/features/theme-editor.js?v=46"></script>
-    <script src="js/features/font-presets.js?v=46"></script>
-    <script src="js/features/group-chat.js?v=46"></script>
-    <script src="js/features/dream-journal.js?v=46"></script>
-    <script src="js/features/wishlist.js?v=46"></script>
-    <script src="js/features/ask-partner.js?v=46"></script>
-    <script src="js/features/kaomoji-quick.js?v=46"></script>
-    <script src="js/features/call.js?v=46"></script>
-    <script src="js/features/poke-style.js?v=46"></script>
+    <script src="js/features/mood.js?v=47"></script>
+    <script src="js/features/envelope.js?v=47"></script>
+    <script src="js/features/reply-library.js?v=47"></script>
+    <script src="js/features/theme-editor.js?v=47"></script>
+    <script src="js/features/font-presets.js?v=47"></script>
+    <script src="js/features/group-chat.js?v=47"></script>
+    <script src="js/features/dream-journal.js?v=47"></script>
+    <script src="js/features/wishlist.js?v=47"></script>
+    <script src="js/features/ask-partner.js?v=47"></script>
+    <script src="js/features/kaomoji-quick.js?v=47"></script>
+    <script src="js/features/call.js?v=47"></script>
+    <script src="js/features/poke-style.js?v=47"></script>
+    <script src="js/features/bg-fit.js?v=47"></script>
 
     <!-- == 合并模块 == -->
-    <script src="js/games.js?v=46"></script> 
-    <script src="js/features.js?v=46"></script> 
-    <script src="js/data.js?v=46"></script>
-    <script src="js/onboarding.js?v=46"></script> 
-    <script src="js/listeners.js?v=46"></script>
-    <script src="js/app.js?v=46"></script>
+    <script src="js/games.js?v=47"></script> 
+    <script src="js/features.js?v=47"></script> 
+    <script src="js/data.js?v=47"></script>
+    <script src="js/onboarding.js?v=47"></script> 
+    <script src="js/listeners.js?v=47"></script>
+    <script src="js/app.js?v=47"></script>
     <script>
         (function () {
             var v = (window.APP_VERSION || '5.0.0') + ' · ' + (window.APP_BUILD_DATE || '');
